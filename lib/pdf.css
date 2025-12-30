@@ -4,6 +4,7 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
 #pdf-viewer {
   display: block;
   border: none;
@@ -11,4 +12,396 @@ html, body {
   position: absolute;
   width: 100%;
   height: 100%;
+}
+
+/* VSCode主题自动适配 */
+body.vscode-dark {
+  --toolbar-bg-color: var(--vscode-editor-background, #1e1e1e);
+  --toolbar-text-color: var(--vscode-editor-foreground, #cccccc);
+  --sidebar-bg-color: var(--vscode-sideBar-background, #252526);
+  --sidebar-text-color: var(--vscode-sideBar-foreground, #cccccc);
+}
+
+body.vscode-light {
+  --toolbar-bg-color: var(--vscode-editor-background, #ffffff);
+  --toolbar-text-color: var(--vscode-editor-foreground, #333333);
+  --sidebar-bg-color: var(--vscode-sideBar-background, #f3f3f3);
+  --sidebar-text-color: var(--vscode-sideBar-foreground, #333333);
+}
+
+body.vscode-high-contrast {
+  --toolbar-bg-color: var(--vscode-editor-background, #000000);
+  --toolbar-text-color: var(--vscode-editor-foreground, #ffffff);
+  --sidebar-bg-color: var(--vscode-sideBar-background, #000000);
+  --sidebar-text-color: var(--vscode-sideBar-foreground, #ffffff);
+}
+
+/* 应用主题变量到PDF.js组件 */
+body.vscode-dark #toolbarContainer,
+body.vscode-light #toolbarContainer,
+body.vscode-high-contrast #toolbarContainer {
+  background-color: var(--toolbar-bg-color);
+  border-bottom-color: var(--vscode-panel-border, #454545);
+}
+
+body.vscode-dark #sidebarContainer,
+body.vscode-light #sidebarContainer,
+body.vscode-high-contrast #sidebarContainer {
+  background-color: var(--sidebar-bg-color);
+}
+
+body.vscode-dark .toolbarButton,
+body.vscode-light .toolbarButton,
+body.vscode-high-contrast .toolbarButton {
+  color: var(--toolbar-text-color);
+}
+
+body.vscode-dark #viewerContainer,
+body.vscode-high-contrast #viewerContainer {
+  background-color: #525659;
+}
+
+body.vscode-light #viewerContainer {
+  background-color: #808080;
+}
+
+/* 对话框样式适配 */
+body.vscode-dark .dialog,
+body.vscode-dark dialog {
+  background-color: var(--vscode-editorWidget-background, #252526);
+  color: var(--vscode-editorWidget-foreground, #cccccc);
+  border-color: var(--vscode-editorWidget-border, #454545);
+}
+
+body.vscode-light .dialog,
+body.vscode-light dialog {
+  background-color: var(--vscode-editorWidget-background, #f3f3f3);
+  color: var(--vscode-editorWidget-foreground, #333333);
+  border-color: var(--vscode-editorWidget-border, #c8c8c8);
+}
+
+/* 查找栏样式适配 */
+body.vscode-dark #findbar,
+body.vscode-light #findbar,
+body.vscode-high-contrast #findbar {
+  background-color: var(--vscode-editorWidget-background);
+  color: var(--vscode-editorWidget-foreground);
+}
+
+body.vscode-dark #findbar input,
+body.vscode-light #findbar input,
+body.vscode-high-contrast #findbar input {
+  background-color: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #cccccc);
+  border-color: var(--vscode-input-border, #3c3c3c);
+}
+
+/* 次级工具栏样式适配 */
+body.vscode-dark #secondaryToolbar,
+body.vscode-light #secondaryToolbar,
+body.vscode-high-contrast #secondaryToolbar {
+  background-color: var(--vscode-menu-background, #252526);
+  color: var(--vscode-menu-foreground, #cccccc);
+}
+
+body.vscode-dark .secondaryToolbarButton,
+body.vscode-light .secondaryToolbarButton,
+body.vscode-high-contrast .secondaryToolbarButton {
+  color: var(--vscode-menu-foreground);
+}
+
+body.vscode-dark .secondaryToolbarButton:hover,
+body.vscode-light .secondaryToolbarButton:hover,
+body.vscode-high-contrast .secondaryToolbarButton:hover {
+  background-color: var(--vscode-menu-selectionBackground, #094771);
+}
+
+/* ============== 夜间模式样式 ============== */
+body.night-mode {
+  background-color: #1a1a1a;
+}
+
+body.night-mode #viewerContainer {
+  background-color: #1a1a1a;
+}
+
+body.night-mode .page {
+  filter: invert(0.85) hue-rotate(180deg);
+}
+
+body.night-mode .page canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.night-mode #toolbarContainer {
+  background-color: #0d0d0d;
+  border-bottom-color: #333;
+}
+
+body.night-mode #sidebarContainer {
+  background-color: #0d0d0d;
+}
+
+body.night-mode .toolbarButton,
+body.night-mode .secondaryToolbarButton {
+  color: #e0e0e0;
+}
+
+body.night-mode #findbar {
+  background-color: #1a1a1a;
+  border-color: #333;
+}
+
+body.night-mode #findbar input {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.night-mode #secondaryToolbar {
+  background-color: #1a1a1a;
+  border-color: #333;
+}
+
+body.night-mode dialog {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border-color: #333;
+}
+
+body.night-mode .thumbnail {
+  filter: invert(0.85) hue-rotate(180deg);
+}
+
+body.night-mode #outlineView,
+body.night-mode #attachmentsView,
+body.night-mode #layersView {
+  background-color: #0d0d0d;
+  color: #e0e0e0;
+}
+
+body.night-mode .treeItem > a {
+  color: #e0e0e0;
+}
+
+body.night-mode .treeItem > a:hover {
+  background-color: #333;
+}
+
+/* ============== 演示模式增强 ============== */
+body.presentationMode #toolbarContainer,
+body.presentationMode #sidebarContainer {
+  display: none !important;
+}
+
+body.presentationMode #viewerContainer {
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* ============== 滚动条美化 ============== */
+body.vscode-dark ::-webkit-scrollbar,
+body.night-mode ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.vscode-dark ::-webkit-scrollbar-track,
+body.night-mode ::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+body.vscode-dark ::-webkit-scrollbar-thumb,
+body.night-mode ::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 5px;
+}
+
+body.vscode-dark ::-webkit-scrollbar-thumb:hover,
+body.night-mode ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+body.vscode-light ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.vscode-light ::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+body.vscode-light ::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 5px;
+}
+
+body.vscode-light ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* ============== 加载进度条美化 ============== */
+#loadingBar .progress {
+  background-color: var(--vscode-progressBar-background, #0078d4);
+}
+
+/* ============== 页面阴影效果 ============== */
+.page {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin-bottom: 10px;
+}
+
+body.vscode-light .page {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ============== 灰度模式 ============== */
+body.grayscale-mode .page canvas {
+  filter: grayscale(100%);
+}
+
+body.grayscale-mode .thumbnail {
+  filter: grayscale(100%);
+}
+
+/* ============== 护眼模式（棕褐色） ============== */
+body.sepia-mode {
+  background-color: #f4ecd8;
+}
+
+body.sepia-mode #viewerContainer {
+  background-color: #e8dfc8;
+}
+
+body.sepia-mode .page canvas {
+  filter: sepia(40%) brightness(0.95);
+}
+
+body.sepia-mode #toolbarContainer {
+  background-color: #d4c8a8;
+  border-bottom-color: #b8a888;
+}
+
+body.sepia-mode #sidebarContainer {
+  background-color: #d4c8a8;
+}
+
+body.sepia-mode .toolbarButton,
+body.sepia-mode .secondaryToolbarButton {
+  color: #4a4030;
+}
+
+body.sepia-mode #secondaryToolbar {
+  background-color: #d4c8a8;
+}
+
+body.sepia-mode .thumbnail {
+  filter: sepia(40%) brightness(0.95);
+}
+
+/* ============== 高对比度模式 ============== */
+body.high-contrast-mode {
+  background-color: #000000;
+}
+
+body.high-contrast-mode #viewerContainer {
+  background-color: #000000;
+}
+
+body.high-contrast-mode .page canvas {
+  filter: contrast(1.5) brightness(1.1);
+}
+
+body.high-contrast-mode #toolbarContainer {
+  background-color: #000000;
+  border-bottom: 2px solid #ffffff;
+}
+
+body.high-contrast-mode #sidebarContainer {
+  background-color: #000000;
+  border-right: 2px solid #ffffff;
+}
+
+body.high-contrast-mode .toolbarButton,
+body.high-contrast-mode .secondaryToolbarButton {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+
+body.high-contrast-mode #secondaryToolbar {
+  background-color: #000000;
+  border: 2px solid #ffffff;
+}
+
+body.high-contrast-mode dialog {
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+/* ============== 反色模式 ============== */
+body.invert-colors .page canvas {
+  filter: invert(100%);
+}
+
+body.invert-colors .thumbnail {
+  filter: invert(100%);
+}
+
+/* ============== 高亮样式 ============== */
+.pdf-highlight {
+  background-color: yellow !important;
+  opacity: 0.5;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.pdf-highlight.active {
+  background-color: orange !important;
+}
+
+/* ============== 自动滚动指示器 ============== */
+.auto-scroll-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(0, 120, 212, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 10000;
+  pointer-events: none;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ============== 双页视图间距 ============== */
+.spreadHorizontal .page,
+.spreadOdd .page,
+.spreadEven .page {
+  margin: 10px 5px;
+}
+
+/* ============== 全屏模式样式 ============== */
+:fullscreen #toolbarContainer {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+:fullscreen #toolbarContainer:hover {
+  opacity: 1;
+}
+
+:fullscreen #sidebarContainer {
+  display: none;
+}
+
+:fullscreen #viewerContainer {
+  left: 0 !important;
+  background-color: #000;
 }

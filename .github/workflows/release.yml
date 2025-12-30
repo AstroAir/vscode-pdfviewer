@@ -1,0 +1,192 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.version_changed }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check version change
+        id: check
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Get previous version from the last commit
+          git show HEAD^:package.json > /tmp/old_package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/old_package.json
+          PREVIOUS_VERSION=$(node -p "require('/tmp/old_package.json').version")
+          echo "Previous version: $PREVIOUS_VERSION"
+          
+          # Check if version has changed
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Version unchanged"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true' || github.event_name == 'workflow_dispatch'
+    outputs:
+      vsix_name: ${{ steps.package.outputs.vsix_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Package extension
+        id: package
+        run: |
+          npx vsce package
+          VSIX_FILE=$(ls *.vsix)
+          echo "vsix_name=$VSIX_FILE" >> $GITHUB_OUTPUT
+          echo "Packaged: $VSIX_FILE"
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-package
+          path: '*.vsix'
+          retention-days: 30
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [check-version, build]
+    if: needs.check-version.outputs.version_changed == 'true'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-package
+
+      - name: Get VSIX filename
+        id: vsix
+        run: |
+          VSIX_FILE=$(ls *.vsix)
+          echo "filename=$VSIX_FILE" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          # Try to extract changelog section for this version
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract content between version headers
+            NOTES=$(awk "/^## .*${VERSION}|^### .*${VERSION}/,/^## |^### /" CHANGELOG.md | head -n -1 | tail -n +2)
+            if [ -z "$NOTES" ]; then
+              NOTES="Release v${VERSION}"
+            fi
+          else
+            NOTES="Release v${VERSION}"
+          fi
+          # Save to file to handle multiline
+          echo "$NOTES" > release_notes.txt
+          echo "Release notes extracted"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.check-version.outputs.version }}
+          name: v${{ needs.check-version.outputs.version }}
+          body_path: release_notes.txt
+          files: ${{ steps.vsix.outputs.filename }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-marketplace:
+    runs-on: ubuntu-latest
+    needs: [check-version, build, release]
+    if: needs.check-version.outputs.version_changed == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-package
+
+      - name: Publish to VS Code Marketplace
+        run: |
+          VSIX_FILE=$(ls *.vsix)
+          npx vsce publish --packagePath "$VSIX_FILE"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+  publish-open-vsx:
+    runs-on: ubuntu-latest
+    needs: [check-version, build, release]
+    if: needs.check-version.outputs.version_changed == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-package
+
+      - name: Publish to Open VSX Registry
+        run: |
+          npm install -g ovsx
+          VSIX_FILE=$(ls *.vsix)
+          ovsx publish "$VSIX_FILE"
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

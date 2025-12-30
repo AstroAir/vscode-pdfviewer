@@ -1,8 +1,8 @@
 {
   "name": "pdf",
-  "displayName": "vscode-pdf",
-  "description": "Display pdf file in VSCode.",
-  "version": "1.2.2",
+  "displayName": "%displayName%",
+  "description": "%description%",
+  "version": "1.5.0",
   "publisher": "tomoki1207",
   "engines": {
     "vscode": "^1.46.0"
@@ -35,7 +35,7 @@
     "customEditors": [
       {
         "viewType": "pdf.preview",
-        "displayName": "Pdf Preview",
+        "displayName": "%customEditor.displayName%",
         "selector": [
           {
             "filenamePattern": "*.pdf"
@@ -45,10 +45,10 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "PDF Preview",
+      "title": "%config.title%",
       "properties": {
         "pdf-preview.default.cursor": {
-          "markdownDescription": "The default cursor tool for preview.",
+          "markdownDescription": "%config.cursor.description%",
           "type": "string",
           "default": "select",
           "enum": [
@@ -57,18 +57,18 @@
           ]
         },
         "pdf-preview.default.scale": {
-          "markdownDescription": "The default zoom level for preview. Allowed values are `auto`, `page-actual`, `page-fit`, `page-width`, and 1-based scale values. (`1.0` means 100%)",
+          "markdownDescription": "%config.scale.description%",
           "type": "string",
           "default": "auto",
           "pattern": "^(\\d+(?:\\.\\d+)?|auto|page-actual|page-fit|page-width)$"
         },
         "pdf-preview.default.sidebar": {
-          "markdownDescription": "Show the sidebar on load. The default visibility of sidebar for preview.",
+          "markdownDescription": "%config.sidebar.description%",
           "type": "boolean",
           "default": false
         },
         "pdf-preview.default.scrollMode": {
-          "markdownDescription": "The default scroll mode for preview.",
+          "markdownDescription": "%config.scrollMode.description%",
           "type": "string",
           "default": "vertical",
           "enum": [
@@ -78,7 +78,7 @@
           ]
         },
         "pdf-preview.default.spreadMode": {
-          "markdownDescription": "The default spread mode for preview.",
+          "markdownDescription": "%config.spreadMode.description%",
           "type": "string",
           "default": "none",
           "enum": [
@@ -86,8 +86,891 @@
             "odd",
             "even"
           ]
+        },
+        "pdf-preview.default.nightMode": {
+          "markdownDescription": "%config.nightMode.description%",
+          "type": "boolean",
+          "default": false
+        },
+        "pdf-preview.default.rememberPosition": {
+          "markdownDescription": "%config.rememberPosition.description%",
+          "type": "boolean",
+          "default": true
         }
       }
+    },
+    "commands": [
+      {
+        "command": "pdf.gotoPage",
+        "title": "%command.gotoPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.firstPage",
+        "title": "%command.firstPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.lastPage",
+        "title": "%command.lastPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.nextPage",
+        "title": "%command.nextPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.previousPage",
+        "title": "%command.previousPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.zoomIn",
+        "title": "%command.zoomIn%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.zoomOut",
+        "title": "%command.zoomOut%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setZoom",
+        "title": "%command.setZoom%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.print",
+        "title": "%command.print%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.export",
+        "title": "%command.export%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.addBookmark",
+        "title": "%command.addBookmark%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showBookmarks",
+        "title": "%command.showBookmarks%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.removeBookmark",
+        "title": "%command.removeBookmark%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleSidebar",
+        "title": "%command.toggleSidebar%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.find",
+        "title": "%command.find%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showProperties",
+        "title": "%command.showProperties%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.rotateClockwise",
+        "title": "%command.rotateClockwise%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.rotateCounterClockwise",
+        "title": "%command.rotateCounterClockwise%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setScrollMode",
+        "title": "%command.setScrollMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setSpreadMode",
+        "title": "%command.setSpreadMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setCursorTool",
+        "title": "%command.setCursorTool%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copySelection",
+        "title": "%command.copySelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.selectAll",
+        "title": "%command.selectAll%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleNightMode",
+        "title": "%command.toggleNightMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.presentationMode",
+        "title": "%command.presentationMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showRecentPositions",
+        "title": "%command.showRecentPositions%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.clearRecentPositions",
+        "title": "%command.clearRecentPositions%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.fitToWidth",
+        "title": "%command.fitToWidth%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.fitToPage",
+        "title": "%command.fitToPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.actualSize",
+        "title": "%command.actualSize%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showOutline",
+        "title": "%command.showOutline%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.openPreview",
+        "title": "%command.openPreview%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.openInExternalApp",
+        "title": "%command.openInExternalApp%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyFilePath",
+        "title": "%command.copyFilePath%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.revealInExplorer",
+        "title": "%command.revealInExplorer%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showFileInfo",
+        "title": "%command.showFileInfo%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.exportAnnotations",
+        "title": "%command.exportAnnotations%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyAnnotations",
+        "title": "%command.copyAnnotations%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.goBack",
+        "title": "%command.goBack%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.goForward",
+        "title": "%command.goForward%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.extractPageText",
+        "title": "%command.extractPageText%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.extractAllText",
+        "title": "%command.extractAllText%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.extractRangeText",
+        "title": "%command.extractRangeText%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.extractSelection",
+        "title": "%command.extractSelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.startAutoScroll",
+        "title": "%command.startAutoScroll%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.stopAutoScroll",
+        "title": "%command.stopAutoScroll%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleAutoScroll",
+        "title": "%command.toggleAutoScroll%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.openInSplitView",
+        "title": "%command.openInSplitView%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.addPageNote",
+        "title": "%command.addPageNote%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showPageNotes",
+        "title": "%command.showPageNotes%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.exportNotes",
+        "title": "%command.exportNotes%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.gotoPercent",
+        "title": "%command.gotoPercent%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.quickJump",
+        "title": "%command.quickJump%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setColorMode",
+        "title": "%command.setColorMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyPageInfo",
+        "title": "%command.copyPageInfo%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyPageLink",
+        "title": "%command.copyPageLink%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.extractPages",
+        "title": "%command.extractPages%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.capturePageScreenshot",
+        "title": "%command.capturePageScreenshot%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.captureAllPagesScreenshot",
+        "title": "%command.captureAllPagesScreenshot%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyPageAsImage",
+        "title": "%command.copyPageAsImage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.compareWithAnotherPdf",
+        "title": "%command.compareWithAnotherPdf%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.printPageRange",
+        "title": "%command.printPageRange%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleFullscreen",
+        "title": "%command.toggleFullscreen%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleDualPageView",
+        "title": "%command.toggleDualPageView%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleContinuousScroll",
+        "title": "%command.toggleContinuousScroll%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showThumbnailNavigator",
+        "title": "%command.showThumbnailNavigator%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.toggleInvertColors",
+        "title": "%command.toggleInvertColors%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copyAsMarkdownLink",
+        "title": "%command.copyAsMarkdownLink%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.highlightSelection",
+        "title": "%command.highlightSelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.jumpToNextHighlight",
+        "title": "%command.jumpToNextHighlight%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.clearAllHighlights",
+        "title": "%command.clearAllHighlights%",
+        "category": "PDF"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pdf.gotoPage",
+        "key": "ctrl+g",
+        "mac": "cmd+g",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.nextPage",
+        "key": "pagedown",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.previousPage",
+        "key": "pageup",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.firstPage",
+        "key": "home",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.lastPage",
+        "key": "end",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.zoomIn",
+        "key": "ctrl+=",
+        "mac": "cmd+=",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.zoomOut",
+        "key": "ctrl+-",
+        "mac": "cmd+-",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.find",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.print",
+        "key": "ctrl+p",
+        "mac": "cmd+p",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.toggleSidebar",
+        "key": "ctrl+b",
+        "mac": "cmd+b",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.addBookmark",
+        "key": "ctrl+d",
+        "mac": "cmd+d",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.showBookmarks",
+        "key": "ctrl+shift+b",
+        "mac": "cmd+shift+b",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.rotateClockwise",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.copySelection",
+        "key": "ctrl+c",
+        "mac": "cmd+c",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.selectAll",
+        "key": "ctrl+a",
+        "mac": "cmd+a",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.toggleNightMode",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.presentationMode",
+        "key": "f5",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.fitToWidth",
+        "key": "ctrl+1",
+        "mac": "cmd+1",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.fitToPage",
+        "key": "ctrl+2",
+        "mac": "cmd+2",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.actualSize",
+        "key": "ctrl+0",
+        "mac": "cmd+0",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.showOutline",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.goBack",
+        "key": "alt+left",
+        "mac": "alt+left",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.goForward",
+        "key": "alt+right",
+        "mac": "alt+right",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.extractPageText",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.extractAllText",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.extractRangeText",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.extractSelection",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.toggleAutoScroll",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.addPageNote",
+        "key": "ctrl+m",
+        "mac": "cmd+m",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.showPageNotes",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.quickJump",
+        "key": "ctrl+j",
+        "mac": "cmd+j",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      },
+      {
+        "command": "pdf.openInSplitView",
+        "key": "ctrl+k ctrl+\\",
+        "mac": "cmd+k cmd+\\",
+        "when": "activeCustomEditorId == 'pdf.preview'"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "pdf.gotoPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.firstPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.lastPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.nextPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.previousPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.zoomIn",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.zoomOut",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setZoom",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.print",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.export",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.addBookmark",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showBookmarks",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.removeBookmark",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleSidebar",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.find",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showProperties",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.rotateClockwise",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.rotateCounterClockwise",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setScrollMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setSpreadMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setCursorTool",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copySelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.selectAll",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleNightMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.presentationMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showRecentPositions",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.clearRecentPositions",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.fitToWidth",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.fitToPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.actualSize",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showOutline",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.exportAnnotations",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copyAnnotations",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.goBack",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.goForward",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.extractPageText",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.extractAllText",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.extractRangeText",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.extractSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.startAutoScroll",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.stopAutoScroll",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleAutoScroll",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.openInSplitView",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.addPageNote",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showPageNotes",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.exportNotes",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.gotoPercent",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.quickJump",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setColorMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copyPageInfo",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copyPageLink",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.extractPages",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.capturePageScreenshot",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.captureAllPagesScreenshot",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copyPageAsImage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.compareWithAnotherPdf",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.printPageRange",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleFullscreen",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleDualPageView",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleContinuousScroll",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showThumbnailNavigator",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.toggleInvertColors",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copyAsMarkdownLink",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.highlightSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.jumpToNextHighlight",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.clearAllHighlights",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "pdf.openPreview",
+          "when": "resourceExtname == .pdf",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pdf.openInExternalApp",
+          "when": "resourceExtname == .pdf",
+          "group": "navigation@2"
+        },
+        {
+          "command": "pdf.copyFilePath",
+          "when": "resourceExtname == .pdf",
+          "group": "6_copypath@1"
+        },
+        {
+          "command": "pdf.revealInExplorer",
+          "when": "resourceExtname == .pdf",
+          "group": "6_copypath@2"
+        },
+        {
+          "command": "pdf.showFileInfo",
+          "when": "resourceExtname == .pdf",
+          "group": "7_modification@1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "pdf.showProperties",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "1_pdf@1"
+        },
+        {
+          "command": "pdf.export",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "1_pdf@2"
+        },
+        {
+          "command": "pdf.print",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "1_pdf@3"
+        },
+        {
+          "command": "pdf.exportAnnotations",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "2_annotations@1"
+        },
+        {
+          "command": "pdf.toggleSidebar",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "3_view@1"
+        },
+        {
+          "command": "pdf.toggleNightMode",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "3_view@2"
+        }
+      ]
     }
   },
   "scripts": {
@@ -95,7 +978,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "pretest": "npm run compile",
-    "test": "node ./out/test/runTest.js",
+    "test": "node ./out/src/test/runTest.js",
     "lint": "eslint -c .eslintrc.json --ext .ts ./src",
     "package": "vsce package"
   },
@@ -112,7 +995,7 @@
     "eslint-plugin-prettier": "^3.1.3",
     "mocha": "^10.1.0",
     "prettier": "^2.0.4",
-    "typescript": "^3.7.3",
+    "typescript": "^4.9.5",
     "vsce": "^2.15.0",
     "vscode-dts": "^0.3.1",
     "vscode-test": "^1.3.0"
