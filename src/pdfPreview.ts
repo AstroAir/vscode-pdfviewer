@@ -35,6 +35,33 @@ export interface PageNote {
   timestamp: number;
 }
 
+export interface ReadingStats {
+  uri: string;
+  fileName: string;
+  totalPages: number;
+  pagesRead: Set<number>;
+  startTime: number;
+  totalReadingTime: number;
+  lastReadTime: number;
+  lastPage: number;
+}
+
+export interface SearchHistoryItem {
+  query: string;
+  timestamp: number;
+  resultsCount?: number;
+}
+
+export interface HighlightData {
+  text: string;
+  color: string;
+  page: number;
+  timestamp: number;
+  // 用于定位高亮的信息
+  textBefore?: string;
+  textAfter?: string;
+}
+
 export class PdfPreview extends Disposable {
   private _previewState: PreviewState = 'Visible';
   private _currentPage = 1;
@@ -55,6 +82,14 @@ export class PdfPreview extends Disposable {
     | 'sepia'
     | 'highContrast' = 'normal';
   private _pageNotes: Map<number, PageNote> = new Map();
+  private _readingStats: ReadingStats | null = null;
+  private _currentHighlightColor = '#FFFF00'; // 默认黄色
+  private _savedHighlights: HighlightData[] = [];
+  private _sessionStartTime = Date.now();
+  private _pagesVisited: Set<number> = new Set();
+  private _readingTimeInterval: NodeJS.Timeout | null = null;
+  private _searchHistory: SearchHistoryItem[] = [];
+  private _estimatedReadingTimePerPage = 60; // 默认每页60秒
 
   constructor(
     private readonly extensionRoot: vscode.Uri,
@@ -73,10 +108,16 @@ export class PdfPreview extends Disposable {
     this._register(this._statusBarItem);
 
     this.loadBookmarks();
+    this.loadReadingStats();
+    this.loadSearchHistory();
+    this.loadHighlights();
     this._nightMode =
       vscode.workspace
         .getConfiguration('pdf-preview')
         .get('default.nightMode') || false;
+
+    // 启动阅读时间追踪
+    this.startReadingTimeTracking();
     const resourceRoot = resource.with({
       path: resource.path.replace(/\/[^/]+?\.\w+$/, '/'),
     });
@@ -179,6 +220,66 @@ export class PdfPreview extends Disposable {
             this.handleMetadataResult(message.metadata);
             break;
           }
+          case 'selectedTextForSearch': {
+            this.handleSelectedTextForSearch(message.text);
+            break;
+          }
+          case 'selectedTextForTranslate': {
+            this.handleSelectedTextForTranslate(message.text);
+            break;
+          }
+          case 'selectedTextWithPage': {
+            this.handleSelectedTextWithPage(message.text, message.page);
+            break;
+          }
+          case 'outlineResult': {
+            this.handleOutlineResult(message.outline);
+            break;
+          }
+          case 'highlightsSummary': {
+            this.handleHighlightsSummary(message.highlights, message.total);
+            break;
+          }
+          case 'highlightRemoved': {
+            vscode.window.showInformationMessage(
+              t('msg.highlightRemoved', message.remaining)
+            );
+            break;
+          }
+          case 'noHighlights': {
+            vscode.window.showInformationMessage(t('msg.noHighlights'));
+            break;
+          }
+          case 'highlightAdded': {
+            // 保存高亮到存储
+            if (message.highlightData) {
+              this.addHighlightToStorage(message.highlightData);
+            }
+            vscode.window.showInformationMessage(
+              t('msg.highlightAdded', message.count)
+            );
+            break;
+          }
+          case 'highlightRemovedWithData': {
+            // 从存储中删除高亮
+            if (message.index !== undefined) {
+              this.removeHighlightFromStorage(message.index);
+            }
+            break;
+          }
+          case 'highlightsCleared': {
+            // 清除存储中的所有高亮
+            this.clearHighlightsStorage();
+            vscode.window.showInformationMessage(
+              t('msg.highlightsCleared', message.count)
+            );
+            break;
+          }
+          case 'requestStoredHighlights': {
+            // webview 请求恢复高亮
+            this.restoreHighlights();
+            break;
+          }
         }
       })
     );
@@ -220,6 +321,15 @@ export class PdfPreview extends Disposable {
       })
     );
 
+    // 监听 VSCode 主题变化并通知 webview
+    this._register(
+      vscode.window.onDidChangeActiveColorTheme(() => {
+        if (this._previewState !== 'Disposed') {
+          this.webviewEditor.webview.postMessage({ type: 'themeChanged' });
+        }
+      })
+    );
+
     this.webviewEditor.webview.html = this.getWebviewContents();
     this.update();
   }
@@ -254,6 +364,12 @@ export class PdfPreview extends Disposable {
     const config = vscode.workspace.getConfiguration('pdf-preview');
     const settings = {
       cMapUrl: resolveAsUri('lib', 'web', 'cmaps/').toString(),
+      standardFontDataUrl: resolveAsUri(
+        'lib',
+        'web',
+        'standard_fonts/'
+      ).toString(),
+      workerSrc: resolveAsUri('lib', 'build', 'pdf.worker.js').toString(),
       path: docPath.toString(),
       locale: getWebviewLocale(),
       nightMode: this._nightMode,
@@ -288,7 +404,14 @@ export class PdfPreview extends Disposable {
 <link rel="stylesheet" href="${resolveAsUri('lib', 'web', 'viewer.css')}">
 <link rel="stylesheet" href="${resolveAsUri('lib', 'pdf.css')}">
 <script src="${resolveAsUri('lib', 'build', 'pdf.js')}"></script>
-<script src="${resolveAsUri('lib', 'build', 'pdf.worker.js')}"></script>
+<script>
+// 在 viewer.js 加载前设置 workerSrc，防止 "No GlobalWorkerOptions.workerSrc specified" 错误
+if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "${escapeAttribute(
+    resolveAsUri('lib', 'build', 'pdf.worker.js').toString()
+  )}";
+}
+</script>
 <script src="${resolveAsUri('lib', 'web', 'viewer.js')}"></script>
 <script src="${resolveAsUri('lib', 'main.js')}"></script>
 </head>`;
@@ -697,7 +820,39 @@ export class PdfPreview extends Disposable {
 
   // ============== 状态栏功能 ==============
   private updateStatusBar(): void {
-    this._statusBarItem.text = `$(file-pdf) ${this._currentPage} / ${this._totalPages}`;
+    // 追踪页面访问
+    this.trackPageVisit(this._currentPage);
+
+    // 使用增强状态栏
+    const config = vscode.workspace.getConfiguration('pdf-preview');
+    const showProgress = config.get('statusBar.showProgress', true);
+    const showEstimatedTime = config.get('statusBar.showEstimatedTime', true);
+
+    let statusText = `$(file-pdf) ${this._currentPage}/${this._totalPages}`;
+
+    if (showProgress) {
+      const progress = this.getReadingProgress();
+      if (progress > 0) {
+        statusText += ` | ${progress}%`;
+      }
+    }
+
+    if (showEstimatedTime) {
+      const remaining = this.getEstimatedRemainingTime();
+      if (remaining > 0 && this.getReadingProgress() < 100) {
+        statusText += ` | ~${remaining}m`;
+      }
+    }
+
+    this._statusBarItem.text = statusText;
+    this._statusBarItem.tooltip = t(
+      'msg.statusBarTooltipEnhanced',
+      this._currentPage,
+      this._totalPages,
+      this.getReadingProgress(),
+      this.getEstimatedRemainingTime()
+    );
+
     if (this.webviewEditor.active) {
       this._statusBarItem.show();
     }
@@ -1247,7 +1402,10 @@ export class PdfPreview extends Disposable {
             resolve();
           });
 
-          this._extractProgressCallback = (current: number, total: number) => {
+          this._extractProgressCallback = (
+            current: number,
+            total: number
+          ): void => {
             progress.report({
               increment: (1 / total) * 100,
               message: `${current}/${total}`,
@@ -1303,7 +1461,10 @@ export class PdfPreview extends Disposable {
             resolve();
           });
 
-          this._extractProgressCallback = (current: number, total: number) => {
+          this._extractProgressCallback = (
+            current: number,
+            total: number
+          ): void => {
             progress.report({
               increment: (1 / total) * 100,
               message: `${current}/${total}`,
@@ -1836,7 +1997,244 @@ export class PdfPreview extends Disposable {
 
   // ============== 选择性高亮 ==============
   public async highlightSelection(): Promise<void> {
-    this.webviewEditor.webview.postMessage({ type: 'highlightSelection' });
+    this.webviewEditor.webview.postMessage({
+      type: 'highlightSelection',
+      color: this._currentHighlightColor,
+    });
+  }
+
+  public async setHighlightColor(): Promise<void> {
+    const colors = [
+      {
+        label: '$(circle-filled) ' + t('highlight.yellow'),
+        value: '#FFFF00',
+        color: 'yellow',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.green'),
+        value: '#90EE90',
+        color: 'green',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.blue'),
+        value: '#87CEEB',
+        color: 'blue',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.pink'),
+        value: '#FFB6C1',
+        color: 'pink',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.orange'),
+        value: '#FFA500',
+        color: 'orange',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.purple'),
+        value: '#DDA0DD',
+        color: 'purple',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.red'),
+        value: '#FF6B6B',
+        color: 'red',
+      },
+      {
+        label: '$(circle-filled) ' + t('highlight.cyan'),
+        value: '#00CED1',
+        color: 'cyan',
+      },
+      {
+        label: '$(edit) ' + t('highlight.custom'),
+        value: 'custom',
+        color: 'custom',
+      },
+    ];
+
+    const selected = await vscode.window.showQuickPick(colors, {
+      placeHolder: t('msg.selectHighlightColor'),
+    });
+
+    if (!selected) return;
+
+    if (selected.value === 'custom') {
+      const customColor = await vscode.window.showInputBox({
+        prompt: t('msg.enterCustomColor'),
+        placeHolder: '#FF0000',
+        validateInput: (value) => {
+          if (!/^#[0-9A-Fa-f]{6}$/.test(value)) {
+            return t('msg.invalidColorFormat');
+          }
+          return null;
+        },
+      });
+      if (customColor) {
+        this._currentHighlightColor = customColor;
+      }
+    } else {
+      this._currentHighlightColor = selected.value;
+    }
+
+    vscode.window.showInformationMessage(
+      t('msg.highlightColorSet', this._currentHighlightColor)
+    );
+  }
+
+  public async highlightSelectionWithColor(): Promise<void> {
+    await this.setHighlightColor();
+    this.highlightSelection();
+  }
+
+  public async showHighlightsList(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getHighlightsSummary' });
+  }
+
+  public async removeHighlightAtIndex(index: number): Promise<void> {
+    this.webviewEditor.webview.postMessage({
+      type: 'removeHighlight',
+      index: index,
+    });
+  }
+
+  // ============== 高亮数据持久化 ==============
+  private getHighlightsKey(): string {
+    return `pdf-highlights-${this.resource.toString()}`;
+  }
+
+  private loadHighlights(): void {
+    this._savedHighlights =
+      this.context.globalState.get<HighlightData[]>(this.getHighlightsKey()) ||
+      [];
+  }
+
+  private saveHighlights(): void {
+    this.context.globalState.update(
+      this.getHighlightsKey(),
+      this._savedHighlights
+    );
+  }
+
+  public async restoreHighlights(): Promise<void> {
+    if (this._savedHighlights.length > 0) {
+      this.webviewEditor.webview.postMessage({
+        type: 'restoreHighlights',
+        highlights: this._savedHighlights,
+      });
+    }
+  }
+
+  private addHighlightToStorage(highlight: HighlightData): void {
+    this._savedHighlights.push(highlight);
+    this.saveHighlights();
+  }
+
+  private removeHighlightFromStorage(index: number): void {
+    if (index >= 0 && index < this._savedHighlights.length) {
+      this._savedHighlights.splice(index, 1);
+      this.saveHighlights();
+    }
+  }
+
+  private clearHighlightsStorage(): void {
+    this._savedHighlights = [];
+    this.saveHighlights();
+  }
+
+  private async handleHighlightsSummary(
+    highlights: Array<{ index: number; color: string; text: string }>,
+    total: number
+  ): Promise<void> {
+    if (!highlights || highlights.length === 0) {
+      vscode.window.showInformationMessage(t('msg.noHighlights'));
+      return;
+    }
+
+    const items = highlights.map((h) => ({
+      label: `$(paintcan) ${h.text}`,
+      description: t('msg.highlightIndex', h.index, total),
+      detail: t('msg.highlightColor', h.color),
+      index: h.index - 1,
+      color: h.color,
+    }));
+
+    // 添加操作选项
+    const actions = [
+      { label: '$(trash) ' + t('action.deleteAll'), value: 'deleteAll' },
+    ];
+
+    const allItems = [
+      ...items.map((item) => ({ ...item, value: 'highlight' as const })),
+      {
+        label: '',
+        kind: vscode.QuickPickItemKind.Separator,
+      } as unknown as (typeof items)[0] & { value: string },
+      ...actions.map((a) => ({
+        label: a.label,
+        description: '',
+        detail: '',
+        index: -1,
+        color: '',
+        value: a.value,
+      })),
+    ];
+
+    const selected = await vscode.window.showQuickPick(allItems, {
+      placeHolder: t('msg.selectHighlight', total),
+      matchOnDescription: true,
+      matchOnDetail: true,
+    });
+
+    if (!selected) return;
+
+    if (selected.value === 'deleteAll') {
+      const confirm = await vscode.window.showWarningMessage(
+        t('msg.confirmClearHighlights'),
+        { modal: true },
+        t('btn.confirm')
+      );
+      if (confirm) {
+        this.webviewEditor.webview.postMessage({ type: 'clearAllHighlights' });
+      }
+    } else if (selected.index >= 0) {
+      // 显示单个高亮操作选项
+      const highlightActions = [
+        { label: '$(search) ' + t('action.jumpTo'), value: 'jump' },
+        { label: '$(trash) ' + t('action.delete'), value: 'delete' },
+        { label: '$(copy) ' + t('action.copyText'), value: 'copy' },
+      ];
+
+      const action = await vscode.window.showQuickPick(highlightActions, {
+        placeHolder: t('msg.selectHighlightAction'),
+      });
+
+      if (!action) return;
+
+      switch (action.value) {
+        case 'jump':
+          this.webviewEditor.webview.postMessage({
+            type: 'jumpToHighlightIndex',
+            index: selected.index,
+          });
+          break;
+        case 'delete':
+          this.webviewEditor.webview.postMessage({
+            type: 'removeHighlight',
+            index: selected.index,
+          });
+          break;
+        case 'copy': {
+          const highlight = highlights.find(
+            (h) => h.index === selected.index + 1
+          );
+          if (highlight) {
+            await vscode.env.clipboard.writeText(highlight.text);
+            vscode.window.showInformationMessage(t('msg.textCopied'));
+          }
+          break;
+        }
+      }
+    }
   }
 
   // ============== 跳转到上次高亮 ==============
@@ -1963,6 +2361,558 @@ export class PdfPreview extends Disposable {
       language: 'markdown',
     });
     await vscode.window.showTextDocument(doc);
+  }
+
+  // ============== 阅读统计功能 ==============
+  private getReadingStatsKey(): string {
+    return `pdf-reading-stats-${this.resource.toString()}`;
+  }
+
+  private loadReadingStats(): void {
+    const stored = this.context.globalState.get<{
+      uri: string;
+      fileName: string;
+      totalPages: number;
+      pagesRead: number[];
+      startTime: number;
+      totalReadingTime: number;
+      lastReadTime: number;
+      lastPage: number;
+    }>(this.getReadingStatsKey());
+
+    if (stored) {
+      this._readingStats = {
+        ...stored,
+        pagesRead: new Set(stored.pagesRead),
+      };
+    } else {
+      this._readingStats = {
+        uri: this.resource.toString(),
+        fileName: path.basename(this.resource.fsPath),
+        totalPages: this._totalPages,
+        pagesRead: new Set(),
+        startTime: Date.now(),
+        totalReadingTime: 0,
+        lastReadTime: Date.now(),
+        lastPage: 1,
+      };
+    }
+  }
+
+  private saveReadingStats(): void {
+    if (this._readingStats) {
+      const toStore = {
+        ...this._readingStats,
+        pagesRead: Array.from(this._readingStats.pagesRead),
+        totalPages: this._totalPages,
+      };
+      this.context.globalState.update(this.getReadingStatsKey(), toStore);
+    }
+  }
+
+  private startReadingTimeTracking(): void {
+    this._sessionStartTime = Date.now();
+    this._readingTimeInterval = setInterval(() => {
+      if (this._readingStats && this.webviewEditor.active) {
+        this._readingStats.totalReadingTime += 1;
+        this._readingStats.lastReadTime = Date.now();
+        // 每30秒保存一次
+        if (this._readingStats.totalReadingTime % 30 === 0) {
+          this.saveReadingStats();
+        }
+      }
+    }, 1000);
+
+    this._register({
+      dispose: () => {
+        if (this._readingTimeInterval) {
+          clearInterval(this._readingTimeInterval);
+          this._readingTimeInterval = null;
+        }
+        this.saveReadingStats();
+      },
+    });
+  }
+
+  private trackPageVisit(page: number): void {
+    this._pagesVisited.add(page);
+    if (this._readingStats) {
+      this._readingStats.pagesRead.add(page);
+      this._readingStats.lastPage = page;
+    }
+  }
+
+  public async showReadingStats(): Promise<void> {
+    if (!this._readingStats) {
+      vscode.window.showInformationMessage(t('msg.noReadingStats'));
+      return;
+    }
+
+    const progress = Math.round(
+      (this._readingStats.pagesRead.size / Math.max(this._totalPages, 1)) * 100
+    );
+    const totalMinutes = Math.floor(this._readingStats.totalReadingTime / 60);
+    const totalSeconds = this._readingStats.totalReadingTime % 60;
+    const sessionMinutes = Math.floor(
+      (Date.now() - this._sessionStartTime) / 60000
+    );
+
+    const remainingPages = this._totalPages - this._readingStats.pagesRead.size;
+    const avgTimePerPage =
+      this._readingStats.pagesRead.size > 0
+        ? this._readingStats.totalReadingTime /
+          this._readingStats.pagesRead.size
+        : this._estimatedReadingTimePerPage;
+    const estimatedRemaining = Math.ceil(
+      (remainingPages * avgTimePerPage) / 60
+    );
+
+    const content = [
+      `# ${t('stats.title')}`,
+      '',
+      `**${t('stats.fileName')}:** ${this._readingStats.fileName}`,
+      `**${t('stats.totalPages')}:** ${this._totalPages}`,
+      `**${t('stats.pagesRead')}:** ${this._readingStats.pagesRead.size}`,
+      `**${t('stats.progress')}:** ${progress}%`,
+      `**${t('stats.totalReadingTime')}:** ${totalMinutes}${t(
+        'stats.minutes'
+      )} ${totalSeconds}${t('stats.seconds')}`,
+      `**${t('stats.sessionTime')}:** ${sessionMinutes}${t('stats.minutes')}`,
+      `**${t('stats.estimatedRemaining')}:** ${estimatedRemaining}${t(
+        'stats.minutes'
+      )}`,
+      `**${t('stats.lastPage')}:** ${this._readingStats.lastPage}`,
+      '',
+      `## ${t('stats.pagesVisited')}`,
+      Array.from(this._readingStats.pagesRead)
+        .sort((a, b) => a - b)
+        .join(', '),
+    ].join('\n');
+
+    const doc = await vscode.workspace.openTextDocument({
+      content,
+      language: 'markdown',
+    });
+    await vscode.window.showTextDocument(doc);
+  }
+
+  public async clearReadingStats(): Promise<void> {
+    const confirm = await vscode.window.showWarningMessage(
+      t('msg.confirmClearStats'),
+      { modal: true },
+      t('btn.confirm')
+    );
+
+    if (confirm) {
+      await this.context.globalState.update(
+        this.getReadingStatsKey(),
+        undefined
+      );
+      this._readingStats = null;
+      this.loadReadingStats();
+      vscode.window.showInformationMessage(t('msg.statsCleared'));
+    }
+  }
+
+  public getReadingProgress(): number {
+    if (!this._readingStats || this._totalPages === 0) return 0;
+    return Math.round(
+      (this._readingStats.pagesRead.size / this._totalPages) * 100
+    );
+  }
+
+  public getEstimatedRemainingTime(): number {
+    if (!this._readingStats) return 0;
+    const remainingPages = this._totalPages - this._readingStats.pagesRead.size;
+    const avgTimePerPage =
+      this._readingStats.pagesRead.size > 0
+        ? this._readingStats.totalReadingTime /
+          this._readingStats.pagesRead.size
+        : this._estimatedReadingTimePerPage;
+    return Math.ceil((remainingPages * avgTimePerPage) / 60);
+  }
+
+  // ============== 搜索历史功能 ==============
+  private getSearchHistoryKey(): string {
+    return 'pdf-search-history-global';
+  }
+
+  private loadSearchHistory(): void {
+    this._searchHistory =
+      this.context.globalState.get<SearchHistoryItem[]>(
+        this.getSearchHistoryKey()
+      ) || [];
+  }
+
+  private saveSearchHistory(): void {
+    this.context.globalState.update(
+      this.getSearchHistoryKey(),
+      this._searchHistory
+    );
+  }
+
+  public addSearchHistory(query: string, resultsCount?: number): void {
+    if (!query.trim()) return;
+
+    // 移除重复的搜索词
+    this._searchHistory = this._searchHistory.filter(
+      (item) => item.query.toLowerCase() !== query.toLowerCase()
+    );
+
+    this._searchHistory.unshift({
+      query,
+      timestamp: Date.now(),
+      resultsCount,
+    });
+
+    // 最多保留50条记录
+    if (this._searchHistory.length > 50) {
+      this._searchHistory = this._searchHistory.slice(0, 50);
+    }
+
+    this.saveSearchHistory();
+  }
+
+  public async showSearchHistory(): Promise<void> {
+    if (this._searchHistory.length === 0) {
+      vscode.window.showInformationMessage(t('msg.noSearchHistory'));
+      return;
+    }
+
+    const items = this._searchHistory.map((item, index) => ({
+      label: item.query,
+      description:
+        item.resultsCount !== undefined
+          ? t('msg.searchResults', item.resultsCount)
+          : '',
+      detail: new Date(item.timestamp).toLocaleString(),
+      index,
+    }));
+
+    const selected = await vscode.window.showQuickPick(items, {
+      placeHolder: t('msg.selectSearchHistory'),
+    });
+
+    if (selected) {
+      this.webviewEditor.webview.postMessage({
+        type: 'searchText',
+        query: selected.label,
+      });
+    }
+  }
+
+  public async clearSearchHistory(): Promise<void> {
+    const confirm = await vscode.window.showWarningMessage(
+      t('msg.confirmClearSearchHistory'),
+      { modal: true },
+      t('btn.confirm')
+    );
+
+    if (confirm) {
+      this._searchHistory = [];
+      this.saveSearchHistory();
+      vscode.window.showInformationMessage(t('msg.searchHistoryCleared'));
+    }
+  }
+
+  // ============== 书签导入导出功能 ==============
+  public async exportBookmarks(): Promise<void> {
+    if (this._bookmarks.length === 0) {
+      vscode.window.showInformationMessage(t('msg.noBookmarks'));
+      return;
+    }
+
+    const exportData = {
+      fileName: path.basename(this.resource.fsPath),
+      exportTime: new Date().toISOString(),
+      bookmarks: this._bookmarks,
+    };
+
+    const uri = await vscode.window.showSaveDialog({
+      defaultUri: vscode.Uri.file(
+        this.resource.fsPath.replace(/\.pdf$/i, '_bookmarks.json')
+      ),
+      filters: { JSON: ['json'] },
+    });
+
+    if (uri) {
+      const fs = await import('fs');
+      fs.writeFileSync(
+        uri.fsPath,
+        JSON.stringify(exportData, null, 2),
+        'utf-8'
+      );
+      vscode.window.showInformationMessage(
+        t('msg.bookmarksExported', uri.fsPath)
+      );
+    }
+  }
+
+  public async importBookmarks(): Promise<void> {
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: { JSON: ['json'] },
+      title: t('msg.selectBookmarksFile'),
+    });
+
+    if (!uris || uris.length === 0) return;
+
+    try {
+      const fs = await import('fs');
+      const content = fs.readFileSync(uris[0].fsPath, 'utf-8');
+      const data = JSON.parse(content);
+
+      if (!data.bookmarks || !Array.isArray(data.bookmarks)) {
+        vscode.window.showErrorMessage(t('msg.invalidBookmarksFile'));
+        return;
+      }
+
+      const items = [
+        { label: t('import.merge'), value: 'merge' },
+        { label: t('import.replace'), value: 'replace' },
+      ];
+
+      const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: t('msg.selectImportMode'),
+      });
+
+      if (!selected) return;
+
+      if (selected.value === 'replace') {
+        this._bookmarks = data.bookmarks;
+      } else {
+        // 合并书签，避免重复
+        const existingPages = new Set(this._bookmarks.map((b) => b.page));
+        for (const bookmark of data.bookmarks) {
+          if (!existingPages.has(bookmark.page)) {
+            this._bookmarks.push(bookmark);
+          }
+        }
+      }
+
+      this.saveBookmarks();
+      vscode.window.showInformationMessage(
+        t('msg.bookmarksImported', data.bookmarks.length)
+      );
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        t('msg.bookmarksImportError', String(error))
+      );
+    }
+  }
+
+  // ============== 快捷文本操作功能 ==============
+  public async searchSelectedText(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getSelectedText' });
+  }
+
+  public async translateSelectedText(): Promise<void> {
+    this.webviewEditor.webview.postMessage({
+      type: 'getSelectedTextForTranslate',
+    });
+  }
+
+  public async copySelectedTextWithPage(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getSelectedTextWithPage' });
+  }
+
+  // ============== 增强状态栏功能 ==============
+  private updateStatusBarEnhanced(): void {
+    const progress = this.getReadingProgress();
+    const remaining = this.getEstimatedRemainingTime();
+
+    let statusText = `$(file-pdf) ${this._currentPage}/${this._totalPages}`;
+
+    if (progress > 0) {
+      statusText += ` | ${progress}%`;
+    }
+
+    if (remaining > 0 && progress < 100) {
+      statusText += ` | ~${remaining}${t('stats.minShort')}`;
+    }
+
+    this._statusBarItem.text = statusText;
+    this._statusBarItem.tooltip = t(
+      'msg.statusBarTooltipEnhanced',
+      this._currentPage,
+      this._totalPages,
+      progress,
+      remaining
+    );
+  }
+
+  // ============== 快捷键帮助面板 ==============
+  public async showKeyboardShortcuts(): Promise<void> {
+    const shortcuts = [
+      { key: 'Ctrl+G / Cmd+G', action: t('shortcut.gotoPage') },
+      { key: 'PageUp / PageDown', action: t('shortcut.prevNextPage') },
+      { key: 'Home / End', action: t('shortcut.firstLastPage') },
+      { key: 'Ctrl+= / Ctrl+-', action: t('shortcut.zoomInOut') },
+      { key: 'Ctrl+0', action: t('shortcut.actualSize') },
+      { key: 'Ctrl+1 / Ctrl+2', action: t('shortcut.fitWidthPage') },
+      { key: 'Ctrl+F', action: t('shortcut.find') },
+      { key: 'Ctrl+B', action: t('shortcut.toggleSidebar') },
+      { key: 'Ctrl+D', action: t('shortcut.addBookmark') },
+      { key: 'Ctrl+Shift+B', action: t('shortcut.showBookmarks') },
+      { key: 'Ctrl+Shift+N', action: t('shortcut.nightMode') },
+      { key: 'F5', action: t('shortcut.presentationMode') },
+      { key: 'Alt+Left / Alt+Right', action: t('shortcut.backForward') },
+      { key: 'Ctrl+Shift+E', action: t('shortcut.extractText') },
+      { key: 'Ctrl+M', action: t('shortcut.addNote') },
+      { key: 'Ctrl+J', action: t('shortcut.quickJump') },
+    ];
+
+    const content = [
+      `# ${t('shortcuts.title')}`,
+      '',
+      '| ' + t('shortcuts.key') + ' | ' + t('shortcuts.action') + ' |',
+      '|---|---|',
+      ...shortcuts.map((s) => `| \`${s.key}\` | ${s.action} |`),
+    ].join('\n');
+
+    const doc = await vscode.workspace.openTextDocument({
+      content,
+      language: 'markdown',
+    });
+    await vscode.window.showTextDocument(doc);
+  }
+
+  // ============== 大纲书签合并视图 ==============
+  public async showOutlineWithBookmarks(): Promise<void> {
+    // 获取PDF大纲
+    this.webviewEditor.webview.postMessage({ type: 'getOutline' });
+  }
+
+  // ============== 文本操作处理 ==============
+  private async handleSelectedTextForSearch(text: string): Promise<void> {
+    if (!text) return;
+
+    const items = [
+      { label: t('msg.webSearch'), value: 'web' },
+      { label: t('msg.searchInDocument'), value: 'document' },
+    ];
+
+    const selected = await vscode.window.showQuickPick(items, {
+      placeHolder: t('msg.selectSearchAction'),
+    });
+
+    if (!selected) return;
+
+    if (selected.value === 'web') {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
+        text
+      )}`;
+      await vscode.env.openExternal(vscode.Uri.parse(searchUrl));
+    } else {
+      this.webviewEditor.webview.postMessage({
+        type: 'searchText',
+        query: text,
+      });
+      this.addSearchHistory(text);
+    }
+  }
+
+  private async handleSelectedTextForTranslate(text: string): Promise<void> {
+    if (!text) return;
+
+    const translateUrl = `https://translate.google.com/?sl=auto&tl=zh-CN&text=${encodeURIComponent(
+      text
+    )}`;
+    await vscode.env.openExternal(vscode.Uri.parse(translateUrl));
+  }
+
+  private async handleSelectedTextWithPage(
+    text: string,
+    page: number
+  ): Promise<void> {
+    if (!text) return;
+
+    const fileName = path.basename(this.resource.fsPath);
+    const content = `"${text}"\n\n— ${fileName}, ${t('msg.page', page)}`;
+    await vscode.env.clipboard.writeText(content);
+    vscode.window.showInformationMessage(t('msg.selectedTextCopied'));
+  }
+
+  private async handleOutlineResult(
+    outline: Array<{
+      title: string;
+      dest: unknown;
+      level: number;
+      children: unknown[];
+    }>
+  ): Promise<void> {
+    if (!outline || outline.length === 0) {
+      // 如果没有大纲，只显示书签
+      if (this._bookmarks.length === 0) {
+        vscode.window.showInformationMessage(t('msg.noOutlineOrBookmarks'));
+        return;
+      }
+      await this.showBookmarks();
+      return;
+    }
+
+    // 合并大纲和书签
+    type QuickPickItem = {
+      label: string;
+      description: string;
+      detail?: string;
+      type: 'outline' | 'bookmark';
+      dest?: unknown;
+      page?: number;
+    };
+    const items: QuickPickItem[] = [];
+
+    // 添加大纲项
+    type OutlineItem = {
+      title: string;
+      dest: unknown;
+      level: number;
+      children: unknown[];
+    };
+    const flattenOutline = (
+      outlineItems: OutlineItem[],
+      result: QuickPickItem[]
+    ): void => {
+      for (const item of outlineItems) {
+        result.push({
+          label: '  '.repeat(item.level) + '$(list-tree) ' + item.title,
+          description: t('msg.outline'),
+          type: 'outline',
+          dest: item.dest,
+        });
+        if (item.children && Array.isArray(item.children)) {
+          flattenOutline(item.children as OutlineItem[], result);
+        }
+      }
+    };
+    flattenOutline(outline, items);
+
+    // 添加书签
+    for (const bookmark of this._bookmarks) {
+      items.push({
+        label: '$(bookmark) ' + bookmark.label,
+        description: t('msg.page', bookmark.page),
+        detail: t('msg.bookmark'),
+        type: 'bookmark',
+        page: bookmark.page,
+      });
+    }
+
+    const selected = await vscode.window.showQuickPick(items, {
+      placeHolder: t('msg.selectOutlineOrBookmark'),
+    });
+
+    if (selected) {
+      if (selected.type === 'bookmark' && selected.page) {
+        this.gotoPage(selected.page);
+      } else if (selected.type === 'outline' && selected.dest) {
+        // 通过大纲目标跳转
+        this.webviewEditor.webview.postMessage({
+          type: 'navigateToDestination',
+          dest: selected.dest,
+        });
+      }
+    }
   }
 
   // ============== Getters ==============

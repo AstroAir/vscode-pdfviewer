@@ -172,5 +172,21 @@
   "msg.enterPrintRange": "Enter page range to print (1-{0})",
   "msg.markdownLinkCopied": "Markdown link copied to clipboard",
   "msg.confirmClearHighlights": "Clear all highlights in this document?",
-  "btn.confirm": "Confirm"
+  "btn.confirm": "Confirm",
+  "command.showReadingStats": "Show Reading Statistics",
+  "command.clearReadingStats": "Clear Reading Statistics",
+  "command.showSearchHistory": "Show Search History",
+  "command.clearSearchHistory": "Clear Search History",
+  "command.exportBookmarks": "Export Bookmarks",
+  "command.importBookmarks": "Import Bookmarks",
+  "command.showKeyboardShortcuts": "Show Keyboard Shortcuts",
+  "command.searchSelectedText": "Search Selected Text on Web",
+  "command.copySelectedTextWithPage": "Copy Selected Text with Page Info",
+  "config.statusBar.showProgress": "Show reading progress percentage in status bar.",
+  "config.statusBar.showEstimatedTime": "Show estimated remaining reading time in status bar.",
+  "config.readingStats.enabled": "Enable reading statistics tracking.",
+  "config.searchHistory.maxItems": "Maximum number of search history items to keep.",
+  "command.setHighlightColor": "Set Highlight Color",
+  "command.highlightSelectionWithColor": "Highlight Selection with Color",
+  "command.showHighlightsList": "Show Highlights List"
 }

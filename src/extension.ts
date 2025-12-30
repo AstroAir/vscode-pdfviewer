@@ -383,6 +383,66 @@ export function activate(context: vscode.ExtensionContext): void {
       command: 'pdf.clearAllHighlights',
       callback: () => provider.activePreview?.clearAllHighlights(),
     },
+
+    // 阅读统计
+    {
+      command: 'pdf.showReadingStats',
+      callback: () => provider.activePreview?.showReadingStats(),
+    },
+    {
+      command: 'pdf.clearReadingStats',
+      callback: () => provider.activePreview?.clearReadingStats(),
+    },
+
+    // 搜索历史
+    {
+      command: 'pdf.showSearchHistory',
+      callback: () => provider.activePreview?.showSearchHistory(),
+    },
+    {
+      command: 'pdf.clearSearchHistory',
+      callback: () => provider.activePreview?.clearSearchHistory(),
+    },
+
+    // 书签导入导出
+    {
+      command: 'pdf.exportBookmarks',
+      callback: () => provider.activePreview?.exportBookmarks(),
+    },
+    {
+      command: 'pdf.importBookmarks',
+      callback: () => provider.activePreview?.importBookmarks(),
+    },
+
+    // 快捷键帮助
+    {
+      command: 'pdf.showKeyboardShortcuts',
+      callback: () => provider.activePreview?.showKeyboardShortcuts(),
+    },
+
+    // 文本操作
+    {
+      command: 'pdf.searchSelectedText',
+      callback: () => provider.activePreview?.searchSelectedText(),
+    },
+    {
+      command: 'pdf.copySelectedTextWithPage',
+      callback: () => provider.activePreview?.copySelectedTextWithPage(),
+    },
+
+    // 高亮颜色
+    {
+      command: 'pdf.setHighlightColor',
+      callback: () => provider.activePreview?.setHighlightColor(),
+    },
+    {
+      command: 'pdf.highlightSelectionWithColor',
+      callback: () => provider.activePreview?.highlightSelectionWithColor(),
+    },
+    {
+      command: 'pdf.showHighlightsList',
+      callback: () => provider.activePreview?.showHighlightsList(),
+    },
   ];
   /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type */
 

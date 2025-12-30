@@ -255,11 +255,7 @@ suite('Utility Function Tests', () => {
         if (part.includes('-')) {
           const [start, end] = part.split('-').map((n) => parseInt(n, 10));
           if (!isNaN(start) && !isNaN(end)) {
-            for (
-              let i = Math.min(start, end);
-              i <= Math.max(start, end);
-              i++
-            ) {
+            for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
               if (i >= 1 && i <= totalPages) {
                 pages.add(i);
               }
@@ -286,12 +282,18 @@ suite('Utility Function Tests', () => {
 
     // 测试组合
     assert.deepStrictEqual(parsePageRange('1, 3, 5', 10), [1, 3, 5]);
-    assert.deepStrictEqual(parsePageRange('1-3, 5, 7-9', 10), [1, 2, 3, 5, 7, 8, 9]);
+    assert.deepStrictEqual(
+      parsePageRange('1-3, 5, 7-9', 10),
+      [1, 2, 3, 5, 7, 8, 9]
+    );
 
     // 测试边界
     assert.deepStrictEqual(parsePageRange('0', 10), []);
     assert.deepStrictEqual(parsePageRange('11', 10), []);
-    assert.deepStrictEqual(parsePageRange('1-15', 10), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.deepStrictEqual(
+      parsePageRange('1-15', 10),
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    );
 
     // 测试无效输入
     assert.deepStrictEqual(parsePageRange('abc', 10), []);

@@ -172,5 +172,21 @@
   "msg.enterPrintRange": "输入要打印的页面范围（1-{0}）",
   "msg.markdownLinkCopied": "Markdown 链接已复制到剪贴板",
   "msg.confirmClearHighlights": "清除此文档中的所有高亮？",
-  "btn.confirm": "确认"
+  "btn.confirm": "确认",
+  "command.showReadingStats": "显示阅读统计",
+  "command.clearReadingStats": "清除阅读统计",
+  "command.showSearchHistory": "显示搜索历史",
+  "command.clearSearchHistory": "清除搜索历史",
+  "command.exportBookmarks": "导出书签",
+  "command.importBookmarks": "导入书签",
+  "command.showKeyboardShortcuts": "显示快捷键帮助",
+  "command.searchSelectedText": "网页搜索选中文本",
+  "command.copySelectedTextWithPage": "复制选中文本（含页码）",
+  "config.statusBar.showProgress": "在状态栏显示阅读进度百分比。",
+  "config.statusBar.showEstimatedTime": "在状态栏显示预计剩余阅读时间。",
+  "config.readingStats.enabled": "启用阅读统计追踪。",
+  "config.searchHistory.maxItems": "保留的搜索历史最大条数。",
+  "command.setHighlightColor": "设置高亮颜色",
+  "command.highlightSelectionWithColor": "选择颜色并高亮",
+  "command.showHighlightsList": "显示高亮列表"
 }

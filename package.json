@@ -96,6 +96,28 @@
           "markdownDescription": "%config.rememberPosition.description%",
           "type": "boolean",
           "default": true
+        },
+        "pdf-preview.statusBar.showProgress": {
+          "markdownDescription": "%config.statusBar.showProgress%",
+          "type": "boolean",
+          "default": true
+        },
+        "pdf-preview.statusBar.showEstimatedTime": {
+          "markdownDescription": "%config.statusBar.showEstimatedTime%",
+          "type": "boolean",
+          "default": true
+        },
+        "pdf-preview.readingStats.enabled": {
+          "markdownDescription": "%config.readingStats.enabled%",
+          "type": "boolean",
+          "default": true
+        },
+        "pdf-preview.searchHistory.maxItems": {
+          "markdownDescription": "%config.searchHistory.maxItems%",
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "maximum": 200
         }
       }
     },
@@ -453,6 +475,66 @@
       {
         "command": "pdf.clearAllHighlights",
         "title": "%command.clearAllHighlights%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showReadingStats",
+        "title": "%command.showReadingStats%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.clearReadingStats",
+        "title": "%command.clearReadingStats%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showSearchHistory",
+        "title": "%command.showSearchHistory%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.clearSearchHistory",
+        "title": "%command.clearSearchHistory%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.exportBookmarks",
+        "title": "%command.exportBookmarks%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.importBookmarks",
+        "title": "%command.importBookmarks%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showKeyboardShortcuts",
+        "title": "%command.showKeyboardShortcuts%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.searchSelectedText",
+        "title": "%command.searchSelectedText%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.copySelectedTextWithPage",
+        "title": "%command.copySelectedTextWithPage%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.setHighlightColor",
+        "title": "%command.setHighlightColor%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.highlightSelectionWithColor",
+        "title": "%command.highlightSelectionWithColor%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showHighlightsList",
+        "title": "%command.showHighlightsList%",
         "category": "PDF"
       }
     ],
@@ -909,6 +991,54 @@
         },
         {
           "command": "pdf.clearAllHighlights",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showReadingStats",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.clearReadingStats",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showSearchHistory",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.clearSearchHistory",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.exportBookmarks",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.importBookmarks",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showKeyboardShortcuts",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.searchSelectedText",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.copySelectedTextWithPage",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.setHighlightColor",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.highlightSelectionWithColor",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showHighlightsList",
           "when": "activeCustomEditorId == 'pdf.preview'"
         }
       ],

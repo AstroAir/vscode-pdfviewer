@@ -14,106 +14,163 @@ html, body {
   height: 100%;
 }
 
-/* VSCode主题自动适配 */
+/* VSCode主题自动适配 - 使用动态CSS变量 */
+:root {
+  /* 默认值，会被 JavaScript 动态覆盖 */
+  --pdf-toolbar-bg: var(--vscode-editor-background, #1e1e1e);
+  --pdf-toolbar-fg: var(--vscode-editor-foreground, #cccccc);
+  --pdf-sidebar-bg: var(--vscode-sideBar-background, #252526);
+  --pdf-input-bg: var(--vscode-input-background, #3c3c3c);
+  --pdf-input-fg: var(--vscode-input-foreground, #cccccc);
+  --pdf-button-bg: var(--vscode-button-background, #0e639c);
+  --pdf-button-fg: var(--vscode-button-foreground, #ffffff);
+  --pdf-border-color: var(--vscode-panel-border, #454545);
+  --pdf-viewer-bg: #525659;
+}
+
+/* 工具栏样式 */
+#toolbarContainer {
+  background-color: var(--pdf-toolbar-bg) !important;
+  border-bottom-color: var(--pdf-border-color) !important;
+}
+
+/* 侧边栏样式 */
+#sidebarContainer {
+  background-color: var(--pdf-sidebar-bg) !important;
+}
+
+/* 工具栏按钮样式 */
+.toolbarButton {
+  color: var(--pdf-toolbar-fg) !important;
+}
+
+/* 查看器容器背景 */
+#viewerContainer {
+  background-color: var(--pdf-viewer-bg) !important;
+}
+
+/* 工具栏输入框 */
+.toolbarField {
+  background-color: var(--pdf-input-bg) !important;
+  color: var(--pdf-input-fg) !important;
+  border-color: var(--pdf-border-color) !important;
+}
+
+/* 下拉菜单 */
+#scaleSelect {
+  background-color: var(--pdf-input-bg) !important;
+  color: var(--pdf-input-fg) !important;
+  border-color: var(--pdf-border-color) !important;
+}
+
+/* 保留旧的主题类支持以实现向后兼容 */
 body.vscode-dark {
-  --toolbar-bg-color: var(--vscode-editor-background, #1e1e1e);
-  --toolbar-text-color: var(--vscode-editor-foreground, #cccccc);
-  --sidebar-bg-color: var(--vscode-sideBar-background, #252526);
-  --sidebar-text-color: var(--vscode-sideBar-foreground, #cccccc);
+  --pdf-toolbar-bg: var(--vscode-editor-background, #1e1e1e);
+  --pdf-toolbar-fg: var(--vscode-editor-foreground, #cccccc);
+  --pdf-sidebar-bg: var(--vscode-sideBar-background, #252526);
+  --pdf-input-bg: var(--vscode-input-background, #3c3c3c);
+  --pdf-input-fg: var(--vscode-input-foreground, #cccccc);
+  --pdf-border-color: var(--vscode-panel-border, #454545);
+  --pdf-viewer-bg: #525659;
 }
 
 body.vscode-light {
-  --toolbar-bg-color: var(--vscode-editor-background, #ffffff);
-  --toolbar-text-color: var(--vscode-editor-foreground, #333333);
-  --sidebar-bg-color: var(--vscode-sideBar-background, #f3f3f3);
-  --sidebar-text-color: var(--vscode-sideBar-foreground, #333333);
+  --pdf-toolbar-bg: var(--vscode-editor-background, #ffffff);
+  --pdf-toolbar-fg: var(--vscode-editor-foreground, #333333);
+  --pdf-sidebar-bg: var(--vscode-sideBar-background, #f3f3f3);
+  --pdf-input-bg: var(--vscode-input-background, #ffffff);
+  --pdf-input-fg: var(--vscode-input-foreground, #333333);
+  --pdf-border-color: var(--vscode-panel-border, #c8c8c8);
+  --pdf-viewer-bg: #808080;
 }
 
 body.vscode-high-contrast {
-  --toolbar-bg-color: var(--vscode-editor-background, #000000);
-  --toolbar-text-color: var(--vscode-editor-foreground, #ffffff);
-  --sidebar-bg-color: var(--vscode-sideBar-background, #000000);
-  --sidebar-text-color: var(--vscode-sideBar-foreground, #ffffff);
+  --pdf-toolbar-bg: var(--vscode-editor-background, #000000);
+  --pdf-toolbar-fg: var(--vscode-editor-foreground, #ffffff);
+  --pdf-sidebar-bg: var(--vscode-sideBar-background, #000000);
+  --pdf-input-bg: var(--vscode-input-background, #000000);
+  --pdf-input-fg: var(--vscode-input-foreground, #ffffff);
+  --pdf-border-color: var(--vscode-panel-border, #ffffff);
+  --pdf-viewer-bg: #000000;
 }
 
-/* 应用主题变量到PDF.js组件 */
-body.vscode-dark #toolbarContainer,
-body.vscode-light #toolbarContainer,
-body.vscode-high-contrast #toolbarContainer {
-  background-color: var(--toolbar-bg-color);
-  border-bottom-color: var(--vscode-panel-border, #454545);
+/* 对话框样式 */
+dialog,
+.dialog {
+  background-color: var(--pdf-sidebar-bg) !important;
+  color: var(--pdf-toolbar-fg) !important;
+  border-color: var(--pdf-border-color) !important;
 }
 
-body.vscode-dark #sidebarContainer,
-body.vscode-light #sidebarContainer,
-body.vscode-high-contrast #sidebarContainer {
-  background-color: var(--sidebar-bg-color);
+/* 查找栏样式 */
+#findbar {
+  background-color: var(--pdf-toolbar-bg) !important;
+  color: var(--pdf-toolbar-fg) !important;
+  border-color: var(--pdf-border-color) !important;
 }
 
-body.vscode-dark .toolbarButton,
-body.vscode-light .toolbarButton,
-body.vscode-high-contrast .toolbarButton {
-  color: var(--toolbar-text-color);
+#findbar input {
+  background-color: var(--pdf-input-bg) !important;
+  color: var(--pdf-input-fg) !important;
+  border-color: var(--pdf-border-color) !important;
 }
 
-body.vscode-dark #viewerContainer,
-body.vscode-high-contrast #viewerContainer {
-  background-color: #525659;
+/* 次级工具栏样式 */
+#secondaryToolbar {
+  background-color: var(--pdf-sidebar-bg) !important;
+  color: var(--pdf-toolbar-fg) !important;
+  border-color: var(--pdf-border-color) !important;
 }
 
-body.vscode-light #viewerContainer {
-  background-color: #808080;
+.secondaryToolbarButton {
+  color: var(--pdf-toolbar-fg) !important;
 }
 
-/* 对话框样式适配 */
-body.vscode-dark .dialog,
-body.vscode-dark dialog {
-  background-color: var(--vscode-editorWidget-background, #252526);
-  color: var(--vscode-editorWidget-foreground, #cccccc);
-  border-color: var(--vscode-editorWidget-border, #454545);
+.secondaryToolbarButton:hover {
+  background-color: var(--vscode-list-hoverBackground, rgba(90, 93, 94, 0.31)) !important;
 }
 
-body.vscode-light .dialog,
-body.vscode-light dialog {
-  background-color: var(--vscode-editorWidget-background, #f3f3f3);
-  color: var(--vscode-editorWidget-foreground, #333333);
-  border-color: var(--vscode-editorWidget-border, #c8c8c8);
+/* 侧边栏内容 */
+#sidebarContent {
+  background-color: var(--pdf-sidebar-bg) !important;
 }
 
-/* 查找栏样式适配 */
-body.vscode-dark #findbar,
-body.vscode-light #findbar,
-body.vscode-high-contrast #findbar {
-  background-color: var(--vscode-editorWidget-background);
-  color: var(--vscode-editorWidget-foreground);
+#toolbarSidebar {
+  background-color: var(--pdf-sidebar-bg) !important;
+  border-bottom-color: var(--pdf-border-color) !important;
 }
 
-body.vscode-dark #findbar input,
-body.vscode-light #findbar input,
-body.vscode-high-contrast #findbar input {
-  background-color: var(--vscode-input-background, #3c3c3c);
-  color: var(--vscode-input-foreground, #cccccc);
-  border-color: var(--vscode-input-border, #3c3c3c);
+/* 大纲视图 */
+#outlineView,
+#attachmentsView,
+#layersView,
+#thumbnailView {
+  background-color: var(--pdf-sidebar-bg) !important;
+  color: var(--pdf-toolbar-fg) !important;
 }
 
-/* 次级工具栏样式适配 */
-body.vscode-dark #secondaryToolbar,
-body.vscode-light #secondaryToolbar,
-body.vscode-high-contrast #secondaryToolbar {
-  background-color: var(--vscode-menu-background, #252526);
-  color: var(--vscode-menu-foreground, #cccccc);
+.treeItem > a {
+  color: var(--pdf-toolbar-fg) !important;
 }
 
-body.vscode-dark .secondaryToolbarButton,
-body.vscode-light .secondaryToolbarButton,
-body.vscode-high-contrast .secondaryToolbarButton {
-  color: var(--vscode-menu-foreground);
+.treeItem > a:hover {
+  background-color: var(--vscode-list-hoverBackground, rgba(90, 93, 94, 0.31)) !important;
 }
 
-body.vscode-dark .secondaryToolbarButton:hover,
-body.vscode-light .secondaryToolbarButton:hover,
-body.vscode-high-contrast .secondaryToolbarButton:hover {
-  background-color: var(--vscode-menu-selectionBackground, #094771);
+/* 缩略图样式 */
+.thumbnail {
+  background-color: var(--pdf-sidebar-bg) !important;
+}
+
+/* 分隔线 */
+.horizontalToolbarSeparator,
+.verticalToolbarSeparator {
+  background-color: var(--pdf-border-color) !important;
+}
+
+/* 加载栏 */
+#loadingBar {
+  background-color: var(--pdf-toolbar-bg) !important;
 }
 
 /* ============== 夜间模式样式 ============== */
