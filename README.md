@@ -15,6 +15,13 @@ Display pdf in VSCode with enhanced features.
 - **State Persistence**: Remembers your reading position and zoom level
 - **Theme Support**: Automatically adapts to VSCode's light/dark/high-contrast themes
 - **Sidebar**: Thumbnails, document outline, attachments, and layers
+- **Annotations**: Comprehensive annotation support including:
+  - Text highlighting with customizable colors
+  - Underline, strikethrough, and squiggly underline
+  - Comments with popup display
+  - Sticky notes (draggable and editable)
+  - Drawing annotations (rectangle, circle, arrow, freehand)
+- **Right-Click Menu**: Quick access to annotation and common functions via context menu
 
 ## Keyboard Shortcuts
 
@@ -127,11 +134,39 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `PDF: Capture All Pages as Images` - Save all pages as PNG images
 - `PDF: Copy Page as Image` - Copy current page to clipboard as image
 
-### Highlighting
+### Highlighting & Text Annotations
 
 - `PDF: Highlight Selection` - Highlight selected text
+- `PDF: Underline Selection` - Add underline to selected text
+- `PDF: Strikethrough Selection` - Add strikethrough to selected text
+- `PDF: Squiggly Underline Selection` - Add squiggly underline to selected text
+- `PDF: Set Highlight Color` - Choose highlight color
+- `PDF: Highlight Selection with Color` - Highlight with color picker
 - `PDF: Jump to Next Highlight` - Navigate to next highlight
+- `PDF: Show Highlights List` - View all highlights
 - `PDF: Clear All Highlights` - Remove all highlights
+
+### Comments
+
+- `PDF: Add Comment to Selection` - Add a comment to selected text
+- `PDF: Show Comments List` - View all comments and jump to them
+
+### Sticky Notes
+
+- `PDF: Add Sticky Note` - Add a draggable sticky note to the page
+- `PDF: Show Sticky Notes List` - View all sticky notes
+
+### Drawing Annotations
+
+- `PDF: Start Drawing Mode` - Start drawing (rectangle, circle, arrow, or freehand)
+- `PDF: Stop Drawing Mode` - Exit drawing mode
+- `PDF: Clear Drawings` - Remove all drawings
+- `PDF: Show Drawings List` - View all drawing annotations
+
+### Annotation Management
+
+- `PDF: Show All Annotations` - View all annotation types in one list
+- `PDF: Export All Annotations` - Export all annotations to JSON file
 
 ### View Modes
 
@@ -159,6 +194,22 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `PDF: Copy Annotations` - Copy annotations to clipboard
 - `PDF: Compare with Another PDF` - Open comparison view
 - `PDF: Show Document Metadata` - View detailed PDF metadata
+
+## Right-Click Context Menu
+
+When viewing a PDF, right-click to access a context menu with quick access to common functions:
+
+| Group | Commands |
+|-------|----------|
+| Edit | Copy Selection |
+| Annotation | Highlight, Underline, Strikethrough, Squiggly |
+| Comment | Add Comment, Show Comments |
+| Sticky Notes | Add Sticky Note, Show Sticky Notes |
+| Drawing | Start Drawing, Stop Drawing, Clear Drawings |
+| Settings | Set Highlight Color |
+| Management | Show All Annotations, Export Annotations, Show Highlights |
+| Bookmarks | Add Bookmark, Show Bookmarks |
+| View | Night Mode, Sidebar, Find |
 
 ## Configuration
 

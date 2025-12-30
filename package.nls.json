@@ -188,5 +188,18 @@
   "config.searchHistory.maxItems": "Maximum number of search history items to keep.",
   "command.setHighlightColor": "Set Highlight Color",
   "command.highlightSelectionWithColor": "Highlight Selection with Color",
-  "command.showHighlightsList": "Show Highlights List"
+  "command.showHighlightsList": "Show Highlights List",
+  "command.underlineSelection": "Underline Selection",
+  "command.strikethroughSelection": "Strikethrough Selection",
+  "command.squigglySelection": "Squiggly Underline Selection",
+  "command.addCommentToSelection": "Add Comment to Selection",
+  "command.showCommentsList": "Show Comments List",
+  "command.addStickyNote": "Add Sticky Note",
+  "command.showStickyNotesList": "Show Sticky Notes List",
+  "command.startDrawingMode": "Start Drawing Mode",
+  "command.stopDrawingMode": "Stop Drawing Mode",
+  "command.clearDrawings": "Clear Drawings",
+  "command.showDrawingsList": "Show Drawings List",
+  "command.exportAllAnnotations": "Export All Annotations",
+  "command.showAllAnnotationsList": "Show All Annotations"
 }

@@ -443,6 +443,68 @@ export function activate(context: vscode.ExtensionContext): void {
       command: 'pdf.showHighlightsList',
       callback: () => provider.activePreview?.showHighlightsList(),
     },
+
+    // 扩展注释功能
+    {
+      command: 'pdf.underlineSelection',
+      callback: () => provider.activePreview?.underlineSelection(),
+    },
+    {
+      command: 'pdf.strikethroughSelection',
+      callback: () => provider.activePreview?.strikethroughSelection(),
+    },
+    {
+      command: 'pdf.squigglySelection',
+      callback: () => provider.activePreview?.squigglySelection(),
+    },
+
+    // 评论功能
+    {
+      command: 'pdf.addCommentToSelection',
+      callback: () => provider.activePreview?.addCommentToSelection(),
+    },
+    {
+      command: 'pdf.showCommentsList',
+      callback: () => provider.activePreview?.showCommentsList(),
+    },
+
+    // 便签功能
+    {
+      command: 'pdf.addStickyNote',
+      callback: () => provider.activePreview?.addStickyNote(),
+    },
+    {
+      command: 'pdf.showStickyNotesList',
+      callback: () => provider.activePreview?.showStickyNotesList(),
+    },
+
+    // 绘图注释功能
+    {
+      command: 'pdf.startDrawingMode',
+      callback: () => provider.activePreview?.startDrawingMode(),
+    },
+    {
+      command: 'pdf.stopDrawingMode',
+      callback: () => provider.activePreview?.stopDrawingMode(),
+    },
+    {
+      command: 'pdf.clearDrawings',
+      callback: () => provider.activePreview?.clearDrawings(),
+    },
+    {
+      command: 'pdf.showDrawingsList',
+      callback: () => provider.activePreview?.showDrawingsList(),
+    },
+
+    // 全部注释管理
+    {
+      command: 'pdf.exportAllAnnotations',
+      callback: () => provider.activePreview?.exportAllAnnotations(),
+    },
+    {
+      command: 'pdf.showAllAnnotationsList',
+      callback: () => provider.activePreview?.showAllAnnotationsList(),
+    },
   ];
   /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type */
 

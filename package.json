@@ -536,6 +536,71 @@
         "command": "pdf.showHighlightsList",
         "title": "%command.showHighlightsList%",
         "category": "PDF"
+      },
+      {
+        "command": "pdf.underlineSelection",
+        "title": "%command.underlineSelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.strikethroughSelection",
+        "title": "%command.strikethroughSelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.squigglySelection",
+        "title": "%command.squigglySelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.addCommentToSelection",
+        "title": "%command.addCommentToSelection%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showCommentsList",
+        "title": "%command.showCommentsList%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.addStickyNote",
+        "title": "%command.addStickyNote%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showStickyNotesList",
+        "title": "%command.showStickyNotesList%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.startDrawingMode",
+        "title": "%command.startDrawingMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.stopDrawingMode",
+        "title": "%command.stopDrawingMode%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.clearDrawings",
+        "title": "%command.clearDrawings%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showDrawingsList",
+        "title": "%command.showDrawingsList%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.exportAllAnnotations",
+        "title": "%command.exportAllAnnotations%",
+        "category": "PDF"
+      },
+      {
+        "command": "pdf.showAllAnnotationsList",
+        "title": "%command.showAllAnnotationsList%",
+        "category": "PDF"
       }
     ],
     "keybindings": [
@@ -1040,6 +1105,58 @@
         {
           "command": "pdf.showHighlightsList",
           "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.underlineSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.strikethroughSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.squigglySelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.addCommentToSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showCommentsList",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.addStickyNote",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showStickyNotesList",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.startDrawingMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.stopDrawingMode",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.clearDrawings",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showDrawingsList",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.exportAllAnnotations",
+          "when": "activeCustomEditorId == 'pdf.preview'"
+        },
+        {
+          "command": "pdf.showAllAnnotationsList",
+          "when": "activeCustomEditorId == 'pdf.preview'"
         }
       ],
       "explorer/context": [
@@ -1099,6 +1216,113 @@
           "command": "pdf.toggleNightMode",
           "when": "activeCustomEditorId == 'pdf.preview'",
           "group": "3_view@2"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "pdf.copySelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "1_edit@1"
+        },
+        {
+          "command": "pdf.highlightSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "2_annotation@1"
+        },
+        {
+          "command": "pdf.underlineSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "2_annotation@2"
+        },
+        {
+          "command": "pdf.strikethroughSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "2_annotation@3"
+        },
+        {
+          "command": "pdf.squigglySelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "2_annotation@4"
+        },
+        {
+          "command": "pdf.addCommentToSelection",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "3_comment@1"
+        },
+        {
+          "command": "pdf.showCommentsList",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "3_comment@2"
+        },
+        {
+          "command": "pdf.addStickyNote",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "4_sticky@1"
+        },
+        {
+          "command": "pdf.showStickyNotesList",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "4_sticky@2"
+        },
+        {
+          "command": "pdf.startDrawingMode",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "5_drawing@1"
+        },
+        {
+          "command": "pdf.stopDrawingMode",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "5_drawing@2"
+        },
+        {
+          "command": "pdf.clearDrawings",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "5_drawing@3"
+        },
+        {
+          "command": "pdf.setHighlightColor",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "6_settings@1"
+        },
+        {
+          "command": "pdf.showAllAnnotationsList",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "7_manage@1"
+        },
+        {
+          "command": "pdf.exportAllAnnotations",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "7_manage@2"
+        },
+        {
+          "command": "pdf.showHighlightsList",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "7_manage@3"
+        },
+        {
+          "command": "pdf.addBookmark",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "8_bookmark@1"
+        },
+        {
+          "command": "pdf.showBookmarks",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "8_bookmark@2"
+        },
+        {
+          "command": "pdf.toggleNightMode",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "9_view@1"
+        },
+        {
+          "command": "pdf.toggleSidebar",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "9_view@2"
+        },
+        {
+          "command": "pdf.find",
+          "when": "activeCustomEditorId == 'pdf.preview'",
+          "group": "9_view@3"
         }
       ]
     }

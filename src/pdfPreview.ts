@@ -62,6 +62,67 @@ export interface HighlightData {
   textAfter?: string;
 }
 
+// 扩展注释数据接口
+export interface AnnotationData {
+  type: 'underline' | 'strikethrough' | 'squiggly';
+  text: string;
+  color: string;
+  page: number;
+  timestamp: number;
+  textBefore?: string;
+  textAfter?: string;
+}
+
+// 评论数据接口
+export interface CommentData {
+  text: string;
+  comment: string;
+  color: string;
+  page: number;
+  timestamp: number;
+  textBefore?: string;
+  textAfter?: string;
+  author?: string;
+}
+
+// 便签数据接口
+export interface StickyNoteData {
+  content: string;
+  color: string;
+  page: number;
+  x: number;
+  y: number;
+  timestamp: number;
+}
+
+// 绘图注释数据接口
+export interface DrawingData {
+  type: 'rectangle' | 'circle' | 'arrow' | 'freehand';
+  color: string;
+  strokeWidth: number;
+  page: number;
+  timestamp: number;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  radius?: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  path?: Array<{ x: number; y: number }>;
+}
+
+// 所有注释数据汇总接口
+export interface AllAnnotationsData {
+  highlights: HighlightData[];
+  annotations: AnnotationData[];
+  comments: CommentData[];
+  stickyNotes: StickyNoteData[];
+  drawings: DrawingData[];
+}
+
 export class PdfPreview extends Disposable {
   private _previewState: PreviewState = 'Visible';
   private _currentPage = 1;
@@ -85,6 +146,15 @@ export class PdfPreview extends Disposable {
   private _readingStats: ReadingStats | null = null;
   private _currentHighlightColor = '#FFFF00'; // 默认黄色
   private _savedHighlights: HighlightData[] = [];
+  private _savedAnnotations: AnnotationData[] = [];
+  private _savedComments: CommentData[] = [];
+  private _savedStickyNotes: StickyNoteData[] = [];
+  private _savedDrawings: DrawingData[] = [];
+  private _currentAnnotationType:
+    | 'highlight'
+    | 'underline'
+    | 'strikethrough'
+    | 'squiggly' = 'highlight';
   private _sessionStartTime = Date.now();
   private _pagesVisited: Set<number> = new Set();
   private _readingTimeInterval: NodeJS.Timeout | null = null;
@@ -280,6 +350,143 @@ export class PdfPreview extends Disposable {
             this.restoreHighlights();
             break;
           }
+          // ============== 扩展注释消息处理 ==============
+          case 'annotationAdded': {
+            if (message.annotationData) {
+              this.addAnnotationToStorage(message.annotationData);
+            }
+            vscode.window.showInformationMessage(
+              t('msg.annotationAdded', message.annotationType, message.count)
+            );
+            break;
+          }
+          case 'annotationError': {
+            vscode.window.showErrorMessage(
+              t('msg.annotationError', message.error)
+            );
+            break;
+          }
+          // ============== 评论消息处理 ==============
+          case 'commentAdded': {
+            if (message.commentData) {
+              this.addCommentToStorage(message.commentData);
+            }
+            vscode.window.showInformationMessage(
+              t('msg.commentAdded', message.count)
+            );
+            break;
+          }
+          case 'commentDeleted': {
+            vscode.window.showInformationMessage(
+              t('msg.commentDeleted', message.remaining)
+            );
+            break;
+          }
+          case 'commentEdited': {
+            vscode.window.showInformationMessage(t('msg.commentEdited'));
+            break;
+          }
+          case 'commentsList': {
+            this.handleCommentsList(message.comments, message.total);
+            break;
+          }
+          case 'showComment': {
+            this.handleShowComment(message);
+            break;
+          }
+          case 'commentError': {
+            vscode.window.showErrorMessage(
+              t('msg.commentError', message.error)
+            );
+            break;
+          }
+          case 'noComments': {
+            vscode.window.showInformationMessage(t('msg.noComments'));
+            break;
+          }
+          // ============== 便签消息处理 ==============
+          case 'stickyNoteAdded': {
+            if (message.noteData) {
+              this.addStickyNoteToStorage(message.noteData);
+            }
+            vscode.window.showInformationMessage(
+              t('msg.stickyNoteAdded', message.count)
+            );
+            break;
+          }
+          case 'stickyNoteDeleted': {
+            vscode.window.showInformationMessage(
+              t('msg.stickyNoteDeleted', message.remaining)
+            );
+            break;
+          }
+          case 'stickyNoteUpdated': {
+            this.updateStickyNoteInStorage(message.index, message.content);
+            break;
+          }
+          case 'stickyNotePositionChanged': {
+            this.updateStickyNotePositionInStorage(
+              message.index,
+              message.x,
+              message.y
+            );
+            break;
+          }
+          case 'stickyNotesList': {
+            this.handleStickyNotesList(message.notes, message.total);
+            break;
+          }
+          case 'stickyNoteError': {
+            vscode.window.showErrorMessage(
+              t('msg.stickyNoteError', message.error)
+            );
+            break;
+          }
+          // ============== 绘图注释消息处理 ==============
+          case 'drawingAdded': {
+            if (message.drawingData) {
+              this.addDrawingToStorage(message.drawingData);
+            }
+            vscode.window.showInformationMessage(
+              t('msg.drawingAdded', message.count)
+            );
+            break;
+          }
+          case 'drawingDeleted': {
+            vscode.window.showInformationMessage(
+              t('msg.drawingDeleted', message.remaining)
+            );
+            break;
+          }
+          case 'drawingsCleared': {
+            vscode.window.showInformationMessage(
+              t('msg.drawingsCleared', message.count)
+            );
+            break;
+          }
+          case 'drawingModeStarted': {
+            vscode.window.showInformationMessage(
+              t('msg.drawingModeStarted', message.drawingType)
+            );
+            break;
+          }
+          case 'drawingModeStopped': {
+            vscode.window.showInformationMessage(t('msg.drawingModeStopped'));
+            break;
+          }
+          case 'drawingAnnotationsList': {
+            this.handleDrawingsList(message.drawings, message.total);
+            break;
+          }
+          // ============== 全部注释数据 ==============
+          case 'allAnnotationsData': {
+            this.handleAllAnnotationsData(message.data, message.counts);
+            break;
+          }
+          case 'annotationsRestored': {
+            vscode.window.showInformationMessage(t('msg.annotationsRestored'));
+            break;
+          }
         }
       })
     );
@@ -321,7 +528,6 @@ export class PdfPreview extends Disposable {
       })
     );
 
-    // 监听 VSCode 主题变化并通知 webview
     this._register(
       vscode.window.onDidChangeActiveColorTheme(() => {
         if (this._previewState !== 'Disposed') {
@@ -2926,5 +3132,484 @@ if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
 
   public get resourceUri(): vscode.Uri {
     return this.resource;
+  }
+
+  // ============== 扩展注释存储方法 ==============
+  private addAnnotationToStorage(annotationData: AnnotationData): void {
+    this._savedAnnotations.push(annotationData);
+    this.saveAllAnnotations();
+  }
+
+  private loadAnnotations(): void {
+    const key = `pdf.annotations.${this.resource.toString()}`;
+    const stored = this.context.globalState.get<AnnotationData[]>(key, []);
+    this._savedAnnotations = stored;
+  }
+
+  private saveAnnotations(): void {
+    const key = `pdf.annotations.${this.resource.toString()}`;
+    this.context.globalState.update(key, this._savedAnnotations);
+  }
+
+  // ============== 评论存储方法 ==============
+  private addCommentToStorage(commentData: CommentData): void {
+    this._savedComments.push(commentData);
+    this.saveAllAnnotations();
+  }
+
+  private loadComments(): void {
+    const key = `pdf.comments.${this.resource.toString()}`;
+    const stored = this.context.globalState.get<CommentData[]>(key, []);
+    this._savedComments = stored;
+  }
+
+  private saveComments(): void {
+    const key = `pdf.comments.${this.resource.toString()}`;
+    this.context.globalState.update(key, this._savedComments);
+  }
+
+  private handleCommentsList(
+    comments: Array<{
+      index: number;
+      text: string;
+      comment: string;
+      page: number;
+      color: string;
+    }>,
+    total: number
+  ): void {
+    if (total === 0) {
+      vscode.window.showInformationMessage(t('msg.noComments'));
+      return;
+    }
+
+    const items = comments.map((c) => ({
+      label: `$(comment) ${c.comment}`,
+      description: `${t('msg.page', c.page)}`,
+      detail: c.text,
+      index: c.index,
+    }));
+
+    vscode.window
+      .showQuickPick(items, {
+        placeHolder: t('msg.selectComment', total),
+      })
+      .then((selected) => {
+        if (selected) {
+          this.webviewEditor.webview.postMessage({
+            type: 'jumpToComment',
+            index: selected.index,
+          });
+        }
+      });
+  }
+
+  private handleShowComment(message: {
+    index: number;
+    comment: string;
+    text: string;
+    page: number;
+    author: string;
+    timestamp: number;
+  }): void {
+    const date = new Date(message.timestamp).toLocaleString();
+    const items = [
+      { label: t('action.jumpTo'), value: 'jump' },
+      { label: t('action.edit'), value: 'edit' },
+      { label: t('action.delete'), value: 'delete' },
+      { label: t('action.copyText'), value: 'copy' },
+    ];
+
+    vscode.window
+      .showQuickPick(items, {
+        placeHolder: `${message.comment} (${message.author} - ${date})`,
+      })
+      .then(async (selected) => {
+        if (!selected) return;
+
+        switch (selected.value) {
+          case 'jump':
+            this.webviewEditor.webview.postMessage({
+              type: 'jumpToComment',
+              index: message.index,
+            });
+            break;
+          case 'edit': {
+            const newComment = await vscode.window.showInputBox({
+              value: message.comment,
+              prompt: t('msg.editComment'),
+            });
+            if (newComment !== undefined) {
+              this.webviewEditor.webview.postMessage({
+                type: 'editComment',
+                index: message.index,
+                newComment: newComment,
+              });
+              // 更新存储
+              if (this._savedComments[message.index]) {
+                this._savedComments[message.index].comment = newComment;
+                this.saveComments();
+              }
+            }
+            break;
+          }
+          case 'delete':
+            this.webviewEditor.webview.postMessage({
+              type: 'deleteComment',
+              index: message.index,
+            });
+            this._savedComments.splice(message.index, 1);
+            this.saveComments();
+            break;
+          case 'copy':
+            await vscode.env.clipboard.writeText(message.text);
+            vscode.window.showInformationMessage(t('msg.textCopied'));
+            break;
+        }
+      });
+  }
+
+  // ============== 便签存储方法 ==============
+  private addStickyNoteToStorage(noteData: StickyNoteData): void {
+    this._savedStickyNotes.push(noteData);
+    this.saveAllAnnotations();
+  }
+
+  private loadStickyNotes(): void {
+    const key = `pdf.stickyNotes.${this.resource.toString()}`;
+    const stored = this.context.globalState.get<StickyNoteData[]>(key, []);
+    this._savedStickyNotes = stored;
+  }
+
+  private saveStickyNotes(): void {
+    const key = `pdf.stickyNotes.${this.resource.toString()}`;
+    this.context.globalState.update(key, this._savedStickyNotes);
+  }
+
+  private updateStickyNoteInStorage(index: number, content: string): void {
+    if (index >= 0 && index < this._savedStickyNotes.length) {
+      this._savedStickyNotes[index].content = content;
+      this.saveStickyNotes();
+    }
+  }
+
+  private updateStickyNotePositionInStorage(
+    index: number,
+    x: number,
+    y: number
+  ): void {
+    if (index >= 0 && index < this._savedStickyNotes.length) {
+      this._savedStickyNotes[index].x = x;
+      this._savedStickyNotes[index].y = y;
+      this.saveStickyNotes();
+    }
+  }
+
+  private handleStickyNotesList(
+    notes: Array<{
+      index: number;
+      content: string;
+      page: number;
+      color: string;
+    }>,
+    total: number
+  ): void {
+    if (total === 0) {
+      vscode.window.showInformationMessage(t('msg.noStickyNotes'));
+      return;
+    }
+
+    const items = notes.map((n) => ({
+      label: `$(note) ${n.content}`,
+      description: `${t('msg.page', n.page)}`,
+      index: n.index,
+    }));
+
+    vscode.window
+      .showQuickPick(items, {
+        placeHolder: t('msg.selectStickyNote', total),
+      })
+      .then((selected) => {
+        if (selected) {
+          this.gotoPage(notes[selected.index].page);
+        }
+      });
+  }
+
+  // ============== 绘图存储方法 ==============
+  private addDrawingToStorage(drawingData: DrawingData): void {
+    this._savedDrawings.push(drawingData);
+    this.saveAllAnnotations();
+  }
+
+  private loadDrawings(): void {
+    const key = `pdf.drawings.${this.resource.toString()}`;
+    const stored = this.context.globalState.get<DrawingData[]>(key, []);
+    this._savedDrawings = stored;
+  }
+
+  private saveDrawings(): void {
+    const key = `pdf.drawings.${this.resource.toString()}`;
+    this.context.globalState.update(key, this._savedDrawings);
+  }
+
+  private handleDrawingsList(
+    drawings: Array<{
+      index: number;
+      type: string;
+      page: number;
+      color: string;
+    }>,
+    total: number
+  ): void {
+    if (total === 0) {
+      vscode.window.showInformationMessage(t('msg.noDrawings'));
+      return;
+    }
+
+    const items = drawings.map((d) => ({
+      label: `$(pencil) ${d.type}`,
+      description: `${t('msg.page', d.page)}`,
+      index: d.index,
+    }));
+
+    vscode.window
+      .showQuickPick(items, {
+        placeHolder: t('msg.selectDrawing', total),
+      })
+      .then((selected) => {
+        if (selected) {
+          this.gotoPage(drawings[selected.index].page);
+        }
+      });
+  }
+
+  // ============== 全部注释数据处理 ==============
+  private saveAllAnnotations(): void {
+    this.saveHighlightsStorage();
+    this.saveAnnotations();
+    this.saveComments();
+    this.saveStickyNotes();
+    this.saveDrawings();
+  }
+
+  private loadAllAnnotations(): void {
+    this.loadHighlights();
+    this.loadAnnotations();
+    this.loadComments();
+    this.loadStickyNotes();
+    this.loadDrawings();
+  }
+
+  private handleAllAnnotationsData(
+    data: AllAnnotationsData,
+    counts: {
+      highlights: number;
+      annotations: number;
+      comments: number;
+      stickyNotes: number;
+      drawings: number;
+    }
+  ): void {
+    const total =
+      counts.highlights +
+      counts.annotations +
+      counts.comments +
+      counts.stickyNotes +
+      counts.drawings;
+
+    if (total === 0) {
+      vscode.window.showInformationMessage(t('msg.noAnnotationsToExport'));
+      return;
+    }
+
+    // 导出为JSON文件
+    vscode.window
+      .showSaveDialog({
+        defaultUri: vscode.Uri.file(
+          this.resource.fsPath.replace(/\.pdf$/i, '_annotations.json')
+        ),
+        filters: { JSON: ['json'] },
+      })
+      .then(async (uri) => {
+        if (uri) {
+          const fs = await import('fs');
+          const exportData = {
+            fileName: path.basename(this.resource.fsPath),
+            exportTime: new Date().toISOString(),
+            ...data,
+          };
+          fs.writeFileSync(
+            uri.fsPath,
+            JSON.stringify(exportData, null, 2),
+            'utf-8'
+          );
+          vscode.window.showInformationMessage(
+            t('msg.annotationsExported', uri.fsPath)
+          );
+        }
+      });
+  }
+
+  private saveHighlightsStorage(): void {
+    const key = `pdf.highlights.${this.resource.toString()}`;
+    this.context.globalState.update(key, this._savedHighlights);
+  }
+
+  // ============== 公开注释方法 ==============
+  public async underlineSelection(): Promise<void> {
+    this.webviewEditor.webview.postMessage({
+      type: 'underlineSelection',
+      color: this._currentHighlightColor,
+    });
+  }
+
+  public async strikethroughSelection(): Promise<void> {
+    this.webviewEditor.webview.postMessage({
+      type: 'strikethroughSelection',
+      color: this._currentHighlightColor,
+    });
+  }
+
+  public async squigglySelection(): Promise<void> {
+    this.webviewEditor.webview.postMessage({
+      type: 'squigglySelection',
+      color: this._currentHighlightColor,
+    });
+  }
+
+  public async addCommentToSelection(): Promise<void> {
+    const comment = await vscode.window.showInputBox({
+      prompt: t('msg.enterComment'),
+      placeHolder: t('msg.commentPlaceholder'),
+    });
+
+    if (comment !== undefined) {
+      this.webviewEditor.webview.postMessage({
+        type: 'addCommentToSelection',
+        comment: comment,
+        color: '#FFE4B5',
+      });
+    }
+  }
+
+  public async showCommentsList(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getCommentsList' });
+  }
+
+  public async addStickyNote(): Promise<void> {
+    const content = await vscode.window.showInputBox({
+      prompt: t('msg.enterStickyNoteContent'),
+      placeHolder: t('msg.stickyNotePlaceholder'),
+    });
+
+    if (content !== undefined) {
+      this.webviewEditor.webview.postMessage({
+        type: 'addStickyNoteAtSelection',
+        content: content,
+        color: '#FFFACD',
+      });
+    }
+  }
+
+  public async showStickyNotesList(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getStickyNotes' });
+  }
+
+  public async startDrawingMode(): Promise<void> {
+    const drawingTypes = [
+      { label: t('drawing.rectangle'), value: 'rectangle' },
+      { label: t('drawing.circle'), value: 'circle' },
+      { label: t('drawing.arrow'), value: 'arrow' },
+      { label: t('drawing.freehand'), value: 'freehand' },
+    ];
+
+    const selected = await vscode.window.showQuickPick(drawingTypes, {
+      placeHolder: t('msg.selectDrawingType'),
+    });
+
+    if (selected) {
+      this.webviewEditor.webview.postMessage({
+        type: 'startDrawingMode',
+        drawingType: selected.value,
+        color: '#FF0000',
+        strokeWidth: 2,
+      });
+    }
+  }
+
+  public stopDrawingMode(): void {
+    this.webviewEditor.webview.postMessage({ type: 'stopDrawingMode' });
+  }
+
+  public clearDrawings(): void {
+    this.webviewEditor.webview.postMessage({ type: 'clearDrawings' });
+  }
+
+  public async showDrawingsList(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getDrawingAnnotations' });
+  }
+
+  public async exportAllAnnotations(): Promise<void> {
+    this.webviewEditor.webview.postMessage({ type: 'getAllAnnotations' });
+  }
+
+  public async showAllAnnotationsList(): Promise<void> {
+    const items = [
+      {
+        label: `$(lightbulb) ${t('annotation.highlights')} (${
+          this._savedHighlights.length
+        })`,
+        value: 'highlights',
+      },
+      {
+        label: `$(text-size) ${t('annotation.textAnnotations')} (${
+          this._savedAnnotations.length
+        })`,
+        value: 'annotations',
+      },
+      {
+        label: `$(comment) ${t('annotation.comments')} (${
+          this._savedComments.length
+        })`,
+        value: 'comments',
+      },
+      {
+        label: `$(note) ${t('annotation.stickyNotes')} (${
+          this._savedStickyNotes.length
+        })`,
+        value: 'stickyNotes',
+      },
+      {
+        label: `$(pencil) ${t('annotation.drawings')} (${
+          this._savedDrawings.length
+        })`,
+        value: 'drawings',
+      },
+    ];
+
+    const selected = await vscode.window.showQuickPick(items, {
+      placeHolder: t('msg.selectAnnotationType'),
+    });
+
+    if (selected) {
+      switch (selected.value) {
+        case 'highlights':
+          this.showHighlightsList();
+          break;
+        case 'annotations':
+          // 显示文本注释列表
+          break;
+        case 'comments':
+          this.showCommentsList();
+          break;
+        case 'stickyNotes':
+          this.showStickyNotesList();
+          break;
+        case 'drawings':
+          this.showDrawingsList();
+          break;
+      }
+    }
   }
 }

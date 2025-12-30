@@ -188,5 +188,18 @@
   "config.searchHistory.maxItems": "保留的搜索历史最大条数。",
   "command.setHighlightColor": "设置高亮颜色",
   "command.highlightSelectionWithColor": "选择颜色并高亮",
-  "command.showHighlightsList": "显示高亮列表"
+  "command.showHighlightsList": "显示高亮列表",
+  "command.underlineSelection": "下划线选中内容",
+  "command.strikethroughSelection": "删除线选中内容",
+  "command.squigglySelection": "波浪线选中内容",
+  "command.addCommentToSelection": "为选中内容添加评论",
+  "command.showCommentsList": "显示评论列表",
+  "command.addStickyNote": "添加便签",
+  "command.showStickyNotesList": "显示便签列表",
+  "command.startDrawingMode": "开始绘图模式",
+  "command.stopDrawingMode": "停止绘图模式",
+  "command.clearDrawings": "清除绘图",
+  "command.showDrawingsList": "显示绘图列表",
+  "command.exportAllAnnotations": "导出所有注释",
+  "command.showAllAnnotationsList": "显示所有注释"
 }
